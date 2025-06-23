@@ -4,7 +4,7 @@
 
 A Helm chart, that allows your easy way to deploy anything-llm. But also allows you to deploy anything-llm with different components like chromadb, nvidia-device-plugin, ollama, and more.
 
-![Version: 1.1.3](https://img.shields.io/badge/Version-1.1.3-informational?style=flat-square)
+![Version: 1.1.4](https://img.shields.io/badge/Version-1.1.4-informational?style=flat-square)
 
 ![AppVersion: 1.2.2](https://img.shields.io/badge/AppVersion-1.2.2-informational?style=flat-square)
 
