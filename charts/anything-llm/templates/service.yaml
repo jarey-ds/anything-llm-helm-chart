@@ -4,6 +4,10 @@ metadata:
   name: {{ include "anything-llm.fullname" . }}
   labels:
     {{- include "anything-llm.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   selector:
     {{- include "anything-llm.selectorLabels" . | nindent 4 }}

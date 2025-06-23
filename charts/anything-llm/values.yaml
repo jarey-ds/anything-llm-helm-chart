@@ -20,6 +20,10 @@ service:
   type: ClusterIP
   # -- Service port.
   port: 3001
+    # -- Optional annotations for the Service.
+  # annotations:
+    # Example for GCE Ingress on Google Cloud (enables NEG):
+    # cloud.google.com/neg: '{"ingress": true}'
 
 # -- Ingress configuration.
 ingress:
