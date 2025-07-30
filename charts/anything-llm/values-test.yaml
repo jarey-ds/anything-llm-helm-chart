@@ -1,0 +1,20 @@
+extras:
+  enableMultiUserMode: true
+  anythingllmMultiUserAdminPassword: "administrador"
+  anythingllmMultiUserAdminUsername: "admin"
+
+image:
+  tag: 1.8.4
+
+# -- Secret configuration.
+secret:
+  # -- Enable secrets.
+  enabled: true
+  # -- Secret data.
+  data:
+    AUTH_TOKEN: "replace-me"
+    JWT_SECRET: "replace-me"
+
+
+config:
+  SIMPLE_SSO_ENABLED: "enable"
