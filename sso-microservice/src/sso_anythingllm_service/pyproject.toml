@@ -1,0 +1,35 @@
+[project]
+name = "sso_anythingllm_service"
+description = "Service Layer for AnythingLLM SSO integration"
+requires-python = ">=3.11,<3.12"
+dynamic = ["version"]
+dependencies = [
+    "sso_anythingllm_repository",
+    "sso_anythingllm_dto",
+    "sso_anythingllm_dto_to_mapper",
+    "sso_anythingllm_to",
+    "pydantic>=2.10.6",
+    "pydantic-settings",
+    "kink"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "VERSION"
+pattern = "(?P<version>[^']+)"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sso_anythingllm_service"]
+include = ["VERSION"]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+sso_anythingllm_repository = { workspace = true }
+sso_anythingllm_dto = { workspace = true }
+sso_anythingllm_dto_to_mapper = { workspace = true }
+sso_anythingllm_to = { workspace = true }

@@ -1,0 +1,190 @@
+[project]
+name = "sso-anythingllm"
+version = "0.1.0"
+description = "SSO integration with AnythingLLM."
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+
+[tool.uv]
+required-version = ">=0.5.0"
+package = false
+prerelease = "allow"
+
+[tool.uv.workspace]
+members = ["src/*"]
+exclude = ["src/*.egg-info"]
+
+[tool.uv.sources]
+sso_anythingllm_dto = { workspace = true }
+sso_anythingllm_dto_entity_mapper = { workspace = true }
+sso_anythingllm_dto_to_mapper = { workspace = true }
+sso_anythingllm_entity = { workspace = true }
+sso_anythingllm_repository = { workspace = true }
+sso_anythingllm_rest = { workspace = true }
+sso_anythingllm_service = { workspace = true }
+sso_anythingllm_facade = { workspace = true }
+sso_anythingllm_to = { workspace = true }
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+src = ["src/*/src"]
+exclude = [".github/actions/"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # isort
+    "I",
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = [
+    "src/*/tests",
+]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-ra -q --strict-markers --tb=short"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+markers = [
+    "slow: Slow running tests",
+]
+
+[tool.coverage.run]
+source = [
+    "src/sso_anythingllm_dto/src",
+    "src/sso_anythingllm_entity_mapper/src",
+    "src/sso_anythingllm_to_mapper/src",
+    "src/sso_anythingllm_entity/src",
+    "src/sso_anythingllm_repository/src",
+    "src/sso_anythingllm_rest/src",
+    "src/sso_anythingllm_service/src",
+    "src/sso_anythingllm_facade/src",
+    "src/sso_anythingllm_to/src"
+]
+omit = [
+    "*/tests/*",
+    "*/__init__.py",
+    "*/conftest.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.pyright]
+typeCheckingMode = "basic"
+reportCallIssue = false
+
+[tool.taskipy.tasks]
+# Development setup
+install = "UV_INDEX_STRATEGY=unsafe-best-match uv sync --frozen --all-packages --group dev --group test && uv run --frozen --dev pre-commit install && uv run --frozen --dev pre-commit install --hook-type pre-push"
+install-prod = "uv sync --frozen --all-packages"
+cache-clean = "uv cache clean"
+run = "uvicorn sso_anythingllm_rest.main:app"
+
+# Migrations check
+migrations-check = { help = "Check migrations for multiple heads", cmd = '''
+  bash -c '
+    count=$(alembic heads | grep -c "head")
+    if [ "$count" -gt 1 ]; then
+      echo "❌ Multiple migration heads detected ($count)"
+      echo "Please merge the migration heads before proceeding."
+      exit 1
+    else
+      echo "V Migrations are correct"
+      exit 0
+    fi
+  '
+  ''' }
+
+run-local = "docker compose up -d --wait postgres && alembic upgrade head && APP_PROFILE=LOCAL uvicorn sso_anythingllm_rest.main:app"
+
+# Database management
+db-start = "docker compose up -d postgres && sleep 5 && docker compose ps"
+db-stop = "docker compose stop postgres && echo 'Database stopped gracefully'"
+db-restart = "task db-stop && sleep 2 && task db-start"
+db-down = "docker compose down"
+db-logs = "docker compose logs -f postgres"
+db-shell = "docker exec -it sso-anythingllm-postgres psql -U sso_anythingllm -d sso_anythingllm"
+db-backup = "./scripts/db-backup.sh"
+db-restore = "./scripts/db-restore.sh"
+db-check = "docker exec sso-anythingllm-postgres psql -U sso-anythingllm -d sso_anythingllm -c 'SELECT table_name, COUNT(*) FROM information_schema.tables WHERE table_schema = '\\''public'\\'' GROUP BY table_name;'"
+
+# Cleaning
+clean = "task clean-pyc && task clean-test"
+clean-pyc = "find . -type f -name '*.pyc' -delete && find . -type f -name '*.pyo' -delete && find . -type f -name '*~' -delete"
+clean-test = "find . -type d -name '.pytest_cache' -exec rm -rf {} + 2>/dev/null || true && find . -type d -name 'coverage' -exec rm -rf {} + 2>/dev/null || true && find . -type d -name 'junit' -exec rm -rf {} + 2>/dev/null || true && find . -type f -name '.coverage*' ! -name '.coveragerc' -delete 2>/dev/null || true"
+
+# Docker
+docker-build = "DOCKER_BUILDKIT=1 docker build -t cinfo/mileva/sso_anythingllm:latest -f deploy/Dockerfile --secret id=pip-netrc,src=/dev/null --secret id=pip-config,src=/dev/null ."
+docker-run = "docker run -p 8000:8000 cinfo/mileva/sso_anythingllm:latest"
+
+# Code quality
+format = "uv run --frozen --dev ruff check --select I --fix . && uv run --frozen --dev ruff format ."
+format-check = "uv run --frozen --dev ruff check --select I . && uv run --frozen --dev ruff format --check ."
+lint = "uv run --frozen --dev ruff check ."
+lint-fix = "uv run --frozen --dev ruff check --fix ."
+type-check = "pyright"
+
+# Testing
+test = "uv run --frozen pytest -v -rfs"
+test-cov = "uv run --frozen pytest -rfs --cov --cov-report=xml --cov-report=term"
+
+# Combined checks
+check-all = "task format-check && task lint && task type-check && task test"
+fix-all = "task format && task lint-fix"
+
+# Package-specific testing
+test-package = "uv run --frozen pytest -rfs src/sso_anythingllm_${package}/src/sso_anythingllm_${package}/tests || uv run --frozen pytest -rfs src/sso_anythingllm_${package}/tests"
+
+# Docker operations - requires credentials for private dependencies
+build = "docker build --build-arg VERSION_TAG=${VERSION_TAG:-latest} -f deploy/Dockerfile -t cinfo/mileva/sso_anythingllm:${BRANCH_TAG:-latest} -t cinfo/mileva/sso_anythingllm:latest ."
+build-no-cache = "docker build --no-cache --build-arg VERSION_TAG=${VERSION_TAG:-latest} -f deploy/Dockerfile -t cinfo/mileva/sso_anythingllm:${BRANCH_TAG:-latest} -t cinfo/mileva/sso_anythingllm:latest ."
+
+# Help
+help = "task --list"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8.0,<1.0.0",
+    "pyright>=1.0.0,<2.0.0",
+    "taskipy>=1.12.0,<2.0.0",
+    "build>=1.2.2.post1",
+    "twine>=6.0.1",
+    "pre-commit"
+]
+test = [
+    "pytest>=8.3.4,<9.0.0",
+    "pytest-cov>=6.0.0,<7.0.0",
+    "pytest-mock>=3.14.0,<4.0.0",
+    "pytest-order>=1.3.0,<2.0.0",
+    "pytest-asyncio>=0.25.2,<1.0.0",
+    "testcontainers>=4.9.1,<5.0.0",
+    "faker",
+]

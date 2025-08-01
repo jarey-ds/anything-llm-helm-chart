@@ -1,0 +1,31 @@
+[project]
+name = "sso_anythingllm_repository"
+description = "Repository Layer for SSO AnythinLLM integration"
+requires-python = ">=3.11,<3.12"
+dynamic = ["version"]
+dependencies = [
+    "sso_anythingllm_entity",
+    "sso_anythingllm_dto",
+    "sso_anythingllm_dto_entity_mapper",
+    "sqlmodel",
+    "sqlalchemy",
+    "aiosqlite==0.21.0",
+    "psycopg[binary,pool]",
+    "psycopg2-binary",
+    "kink",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "VERSION"
+pattern = "(?P<version>[^']+)"
+
+[tool.uv]
+package = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sso_anythingllm_repository"]
+include = ["VERSION"]

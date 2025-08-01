@@ -1,0 +1,14 @@
+repos:
+  - repo: local
+    hooks:
+      - id: format-check
+        name: Check formatting
+        entry: bash -c 'cd sso-microservice && uv run task format-check'
+        language: system
+        pass_filenames: false
+        
+      - id: lint
+        name: Lint code
+        entry: bash -c 'cd sso-microservice && uv run task lint'
+        language: system
+        pass_filenames: false
