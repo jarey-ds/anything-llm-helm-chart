@@ -9,6 +9,6 @@ class KeycloakUserDto(BaseModel):
 
 class AnythingLLMUserDto(BaseModel):
     keycloak_id: str = Field(description="Unique identifier of an user in the Keycloak system.")
-    internal_id: int = Field(description="User's AnythingLLM internal ID.")
+    internal_id: int | None = Field(default=None, description="User's AnythingLLM internal ID.")
     name: str = Field(description="User's name")
     role: str = Field(description="AnythingLLM user's application role (admin|manager|default)")

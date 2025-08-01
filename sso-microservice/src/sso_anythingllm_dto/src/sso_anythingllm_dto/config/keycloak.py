@@ -10,8 +10,10 @@ class KeycloakTokenConfig(BaseSettings):
     group_correlations: Dict[str, str]
     # unique ID used for users in the keycloak token.
     id_claim: str
-    # username property in the JWT token (preferred_username etc).
+    # username property in the JWT token (preferred_username, for example).
     username_claim: str
+    # claim property in the JWT token that holds the groups (groups, for example).
+    group_claim: str
 
     @field_validator("group_correlations", mode="before")
     @classmethod

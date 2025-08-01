@@ -1,6 +1,8 @@
 """This module contains the implementation of the SSO management-related endpoints."""
 
-from typing import Annotated
+from typing import Annotated, Dict
+
+import jwt
 
 # Source imports
 # ────────────────────────────────────────── imports ────────────────────────────────────────── #
@@ -37,12 +39,18 @@ class User(BaseModel):
 
 
 def decode_token(token):
-    return User(username=token + "fakedecoded", email="john@example.com", full_name="John Doe")
+    # Bearer token, we split the string and take the last occurence after the space
+    if " " in token:
+        token = token.split(" ")[1]
+
+    decoded: dict = jwt.decode(token, options={"verify_signature": False})
+
+    return decoded
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-    user = decode_token(token)
-    return user
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Dict:
+    user_dict = decode_token(token)
+    return user_dict
 
 
 def init_app(app: FastAPI, prefix: str = "") -> str:
@@ -66,15 +74,14 @@ def init_app(app: FastAPI, prefix: str = "") -> str:
     status_code=HTTP_200_OK,
     response_model=str,
 )
-async def get_sso_url(current_user: Annotated[User, Depends(get_current_user)]) -> str:
+async def get_sso_url(current_user: Annotated[Dict, Depends(get_current_user)]) -> str:
     """
     Gets the temporarily access URL to a given user on AnythingLLM.
     """
-    # Extract information from the token
+    # Map user's info form the token processed as a dict to a business logic model.
     user_dto: KeycloakUserDto = KeycloakUserDto(id="aloha", name="Jose", groups=["admin"])
     # Get the URL
-    # url = await sso_facade.get_anything_llm_sso_url(user=user_dto)
+    url = await sso_facade.get_anything_llm_sso_url(user=user_dto)
 
     # Provide the URL as a result
-    user_dto.model_dump()
-    return str(current_user.model_dump())
+    return url

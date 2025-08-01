@@ -1,14 +1,12 @@
 """Capability facade interface using Protocol."""
 
-from typing import Protocol
-
-from sso_anythingllm_dto.user import KeycloakUserDto
+from typing import Dict, Protocol
 
 
 class SSOFacadeInterface(Protocol):
     """Facade for managing all SSO use-case operations."""
 
-    async def get_anything_llm_sso_url(self, user: KeycloakUserDto) -> str:
+    async def get_anything_llm_sso_url(self, user: Dict) -> str:
         """
         Get user's SSO temporal URL by User information on Keycloak.
 

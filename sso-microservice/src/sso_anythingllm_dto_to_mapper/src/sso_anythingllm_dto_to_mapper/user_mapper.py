@@ -1,35 +1,29 @@
-from artemis_model_catalogue_dto.model import (
-    ModelPropertyInstanceDto,
-)
-from artemis_model_catalogue_to.model_tos import (
-    PropertyValueTo,
-)
-from typing_extensions import override
+from kink import inject
+
+from sso_anythingllm_dto.config.keycloak import KeycloakTokenConfig
+from sso_anythingllm_dto.user import AnythingLLMUserDto
 
 
-class AnythingLLMU:
+class AnythingLLMUserDtoToMapper:
     """Maps ModelPropertyInstanceDto to PropertyValueTo for REST API responses."""
 
-    @override
-    def to_target(self, origin: ModelPropertyInstanceDto) -> PropertyValueTo:
-        """Convert ModelPropertyInstanceDto to PropertyValueTo.
+    @inject
+    def __init__(self, keycloak_config: KeycloakTokenConfig):
+        self.keycloak_config = keycloak_config
+
+    def to_target(self, origin: AnythingLLMUserDto) -> dict:
+        """Convert AnythingLLMUserDto tio dict based key-values properties.
 
         Raises:
-            ValueError: If property template is not available in the DTO
+            ValueError: If properties can't be provided as dict
         """
-        if not origin.model_property_template:
-            raise ValueError(f"Property template is required but not found for property instance {origin.id}")
+        return origin.model_dump()
 
-        template = origin.model_property_template
-        return PropertyValueTo(
-            key=template.key,
-            value=origin.value,
-            label=template.label,
-            property_type=template.property_type,
-            required=template.required,
+    def from_target(self, target: dict) -> AnythingLLMUserDto:
+        """Convert dict based key-values properties to AnythingLLMUserDto."""
+        user_dto: AnythingLLMUserDto = AnythingLLMUserDto(
+            name=target[self.keycloak_config.username_claim],
+            keycloak_id=target[self.keycloak_config.id_claim],
+            role=self.keycloak_config.group_correlations[target[self.keycloak_config.group_claim]],
         )
-
-    @override
-    def from_target(self, target: PropertyValueTo) -> ModelPropertyInstanceDto:
-        """Not implemented - we don't convert back from TO to DTO."""
-        raise NotImplementedError("Conversion from PropertyValueTo to ModelPropertyInstanceDto is not supported")
+        return user_dto

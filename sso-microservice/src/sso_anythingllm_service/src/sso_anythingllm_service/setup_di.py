@@ -1,7 +1,7 @@
 from kink import di
 
-from sso_anythingllm_service.config.anything_llm import AnythingLLMConfig
-from sso_anythingllm_service.config.keycloak import KeycloakTokenConfig
+from sso_anythingllm_dto.config.anything_llm import AnythingLLMConfig
+from sso_anythingllm_dto.config.keycloak import KeycloakTokenConfig
 
 
 def setup_di():
