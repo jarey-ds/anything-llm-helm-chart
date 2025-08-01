@@ -323,16 +323,31 @@ wheels = [
 ]
 
 [[package]]
-name = "httpx"
-version = "1.0.dev1"
+name = "httpcore"
+version = "1.0.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "certifi" },
     { name = "h11" },
-    { name = "truststore" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/85/93/5d9ca697697028ee22fe549d05ea69dbb7ab788c0271104e90eb40aeec4c/httpx-1.0.dev1.tar.gz", hash = "sha256:1486ffdbc9bef6ae3c3f5c4b24c1860b053def9bc62c6fad8bdbcb8c7b280c29", size = 889731, upload-time = "2025-07-02T18:49:50.669Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/06/94/82699a10bca87a5556c9c59b5963f2d039dbd239f25bc2a63907a05a14cb/httpcore-1.0.9.tar.gz", hash = "sha256:6e34463af53fd2ab5d807f399a9b45ea31c3dfa2276f15a2c3f00afff6e176e8", size = 85484, upload-time = "2025-04-24T22:06:22.219Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b4/81/d65a66fce59b891e0b3dbc09f222b438d8fddb2b8fe08aa9004516378a0e/httpx-1.0.dev1-py3-none-any.whl", hash = "sha256:45888416cd91a79ad016ffa90e2a053ec5fe269059df7bc1b0824924259745dd", size = 30258, upload-time = "2025-07-02T18:49:48.96Z" },
+    { url = "https://files.pythonhosted.org/packages/7e/f5/f66802a942d491edb555dd61e3a9961140fd64c90bce1eafd741609d334d/httpcore-1.0.9-py3-none-any.whl", hash = "sha256:2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55", size = 78784, upload-time = "2025-04-24T22:06:20.566Z" },
+]
+
+[[package]]
+name = "httpx"
+version = "0.28.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "certifi" },
+    { name = "httpcore" },
+    { name = "idna" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b1/df/48c586a5fe32a0f01324ee087459e112ebb7224f646c0b5023f5e79e9956/httpx-0.28.1.tar.gz", hash = "sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc", size = 141406, upload-time = "2024-12-06T15:37:23.222Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad", size = 73517, upload-time = "2024-12-06T15:37:21.509Z" },
 ]
 
 [[package]]
@@ -1215,7 +1230,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "aiosqlite", specifier = "==0.21.0" },
-    { name = "httpx" },
+    { name = "httpx", specifier = "==0.28.1" },
     { name = "kink" },
     { name = "psycopg", extras = ["binary", "pool"] },
     { name = "psycopg2-binary" },
@@ -1349,15 +1364,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/72/6f/fa64ef058ac1446a1e51110c375339b3ec6be245af9d14c87c4a6412dd32/tomli-2.2.1-cp311-cp311-win32.whl", hash = "sha256:465af0e0875402f1d226519c9904f37254b3045fc5084697cefb9bdde1ff99ff", size = 98310, upload-time = "2024-11-27T22:38:05.908Z" },
     { url = "https://files.pythonhosted.org/packages/6a/1c/4a2dcde4a51b81be3530565e92eda625d94dafb46dbeb15069df4caffc34/tomli-2.2.1-cp311-cp311-win_amd64.whl", hash = "sha256:2d0f2fdd22b02c6d81637a3c95f8cd77f995846af7414c5c4b8d0545afa1bc4b", size = 108309, upload-time = "2024-11-27T22:38:06.812Z" },
     { url = "https://files.pythonhosted.org/packages/6e/c2/61d3e0f47e2b74ef40a68b9e6ad5984f6241a942f7cd3bbfbdbd03861ea9/tomli-2.2.1-py3-none-any.whl", hash = "sha256:cb55c73c5f4408779d0cf3eef9f762b9c9f147a77de7b258bef0a5628adc85cc", size = 14257, upload-time = "2024-11-27T22:38:35.385Z" },
-]
-
-[[package]]
-name = "truststore"
-version = "0.10.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/01/a8/cdcf418e067b8ae539012a3f1a51f90b30b26f5e1952a8f60304396babbc/truststore-0.10.0.tar.gz", hash = "sha256:5da347c665714fdfbd46f738c823fe9f0d8775e41ac5fb94f325749091187896", size = 24810, upload-time = "2024-10-23T22:11:21.193Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d1/c9/bab5a5dda14af36fe31e2215f0f87bf34408951972fa7220055926dab2e0/truststore-0.10.0-py3-none-any.whl", hash = "sha256:b3798548e421ffe2ca2a6217cca49e7a17baf40b72d86a5505dc7d701e77d15b", size = 18231, upload-time = "2024-10-23T22:11:19.72Z" },
 ]
 
 [[package]]

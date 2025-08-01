@@ -3,7 +3,11 @@ from unittest.mock import MagicMock, patch
 import httpx
 import pytest
 
-from sso_anythingllm_repository.anything_llm_repository import AnythingLLMRepository
+from sso_anythingllm_repository.anything_llm_repository import (
+    AnythingLLMRepository,
+    ConnectError,
+    TimeoutException,
+)
 from sso_anythingllm_repository.config import AnythingLLMConfig
 from sso_anythingllm_repository.exceptions import AnythingLLMRepositoryError, AuthenticationError, NetworkError
 
@@ -33,7 +37,7 @@ class TestAnythingLLMRepository:
         """Test async context manager"""
         async with AnythingLLMRepository(config) as repo:
             assert repo._client is not None
-            assert isinstance(repo._client, httpx.AsyncClient)
+            assert isinstance(repo._client, httpx.Client)
 
     @pytest.mark.asyncio
     async def test_get_headers(self, config):
@@ -59,6 +63,7 @@ class TestAnythingLLMRepository:
         mock_response.json.return_value = {"workspaces": []}
         mock_response.content = b'{"workspaces": []}'
 
+        await repository._ensure_client()
         with patch.object(repository._client, "request", return_value=mock_response):
             result = await repository.get("/api/v1/workspaces")
             assert result == {"workspaces": []}
@@ -71,6 +76,7 @@ class TestAnythingLLMRepository:
         mock_response.json.return_value = {"id": "123", "name": "Test Workspace"}
         mock_response.content = b'{"id": "123", "name": "Test Workspace"}'
 
+        await repository._ensure_client()
         with patch.object(repository._client, "request", return_value=mock_response):
             result = await repository.post("/api/v1/workspaces", json_data={"name": "Test Workspace"})
             assert result == {"id": "123", "name": "Test Workspace"}
@@ -82,6 +88,7 @@ class TestAnythingLLMRepository:
         mock_response.status_code = 204
         mock_response.content = b""
 
+        await repository._ensure_client()
         with patch.object(repository._client, "request", return_value=mock_response):
             result = await repository.delete("/api/v1/workspaces/123")
             assert result == {"status": "no_content"}
@@ -93,6 +100,7 @@ class TestAnythingLLMRepository:
         mock_response.status_code = 401
         mock_response.text = "Unauthorized"
 
+        await repository._ensure_client()
         with patch.object(repository._client, "request", return_value=mock_response):
             with pytest.raises(AuthenticationError, match="Authentication failed"):
                 await repository.get("/api/v1/workspaces")
@@ -104,6 +112,7 @@ class TestAnythingLLMRepository:
         mock_response.status_code = 404
         mock_response.text = "Not Found"
 
+        await repository._ensure_client()
         with patch.object(repository._client, "request", return_value=mock_response):
             with pytest.raises(AnythingLLMRepositoryError, match="Resource not found"):
                 await repository.get("/api/v1/workspaces/999")
@@ -120,6 +129,7 @@ class TestAnythingLLMRepository:
         mock_response_200.json.return_value = {"success": True}
         mock_response_200.content = b'{"success": True}'
 
+        await repository._ensure_client()
         with patch.object(repository._client, "request", side_effect=[mock_response_500, mock_response_200]):
             with patch("asyncio.sleep", return_value=None):  # Mock sleep to speed up test
                 result = await repository.get("/api/v1/workspaces")
@@ -128,7 +138,8 @@ class TestAnythingLLMRepository:
     @pytest.mark.asyncio
     async def test_timeout_error_with_retry(self, repository):
         """Test timeout error with retry logic"""
-        with patch.object(repository._client, "request", side_effect=httpx.TimeoutException("Request timeout")):
+        await repository._ensure_client()
+        with patch.object(repository._client, "request", side_effect=TimeoutException("Request timeout")):
             with patch("asyncio.sleep", return_value=None):  # Mock sleep to speed up test
                 with pytest.raises(NetworkError, match="Request timeout"):
                     await repository.get("/api/v1/workspaces")
@@ -136,7 +147,8 @@ class TestAnythingLLMRepository:
     @pytest.mark.asyncio
     async def test_connection_error(self, repository):
         """Test connection error handling"""
-        with patch.object(repository._client, "request", side_effect=httpx.ConnectError("Connection failed")):
+        await repository._ensure_client()
+        with patch.object(repository._client, "request", side_effect=ConnectError("Connection failed")):
             with pytest.raises(NetworkError, match="Connection error"):
                 await repository.get("/api/v1/workspaces")
 
@@ -148,6 +160,7 @@ class TestAnythingLLMRepository:
         mock_response.json.return_value = {"workspaces": []}
         mock_response.content = b'{"workspaces": []}'
 
+        await repository._ensure_client()
         with patch.object(repository._client, "request", return_value=mock_response):
             # Test get_workspaces
             result = await repository.get_workspaces()
@@ -189,6 +202,7 @@ class TestAnythingLLMRepository:
         mock_response.json.return_value = {"updated": True}
         mock_response.content = b'{"updated": True}'
 
+        await repository._ensure_client()
         with patch.object(repository._client, "request", return_value=mock_response):
             result = await repository.put("/api/v1/workspaces/123", json_data={"name": "Updated"})
             assert result == {"updated": True}
@@ -201,6 +215,7 @@ class TestAnythingLLMRepository:
         mock_response.json.return_value = {"patched": True}
         mock_response.content = b'{"patched": True}'
 
+        await repository._ensure_client()
         with patch.object(repository._client, "request", return_value=mock_response):
             result = await repository.patch("/api/v1/workspaces/123", json_data={"name": "Patched"})
             assert result == {"patched": True}
