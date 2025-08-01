@@ -4,7 +4,7 @@ A comprehensive async REST API client for AnythingLLM with support for GET, POST
 
 ## Features
 
-- **Async HTTP Client**: Built on `httpx` for high-performance async HTTP requests
+- **Async HTTP Client**: Built on `httpx.AsyncClient` for high-performance async HTTP requests
 - **Configurable Arguments**: Support for custom URLs, headers, timeouts, and retry logic
 - **Comprehensive Error Handling**: Custom exceptions for different error scenarios
 - **Retry Logic**: Exponential backoff with configurable retry attempts

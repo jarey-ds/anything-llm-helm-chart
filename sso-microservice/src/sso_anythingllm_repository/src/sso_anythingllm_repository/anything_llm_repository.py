@@ -6,7 +6,6 @@ from urllib.parse import urljoin
 import httpx
 
 try:
-    httpx
     TimeoutException = httpx.TimeoutException
     ConnectError = httpx.ConnectError
     RequestError = httpx.RequestError
@@ -39,7 +38,7 @@ class AnythingLLMRepository:
     def __init__(self, config: AnythingLLMConfig):
         self.config = config
         self.logger = logging.getLogger(__name__)
-        self._client: Optional[httpx.Client] = None
+        self._client: Optional[httpx.AsyncClient] = None
 
     async def __aenter__(self):
         await self._ensure_client()
@@ -50,11 +49,13 @@ class AnythingLLMRepository:
 
     async def _ensure_client(self):
         if self._client is None:
-            self._client = httpx.Client(headers=self.config.get_headers())
+            self._client = httpx.AsyncClient(
+                base_url=self.config.base_url, headers=self.config.get_headers(), timeout=self.config.timeout
+            )
 
     async def close(self):
         if self._client:
-            self._client.close()
+            await self._client.aclose()
             self._client = None
 
     def _build_url(self, endpoint: str) -> str:
@@ -76,10 +77,12 @@ class AnythingLLMRepository:
             request_kwargs["data"] = data
         if json_data is not None:
             request_kwargs["json"] = json_data
+
         for attempt in range(self.config.max_retries + 1):
             try:
                 self.logger.debug(f"Making {method} request to {url} (attempt {attempt + 1})")
-                response = self._client.request(method, url, **request_kwargs)
+                response = await self._client.request(method, url, **request_kwargs)
+
                 if response.status_code == 200:
                     return response.json() if response.content else {}
                 elif response.status_code == 201:
