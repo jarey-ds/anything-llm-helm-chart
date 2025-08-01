@@ -38,3 +38,21 @@ class AsyncPostgresConf(BaseModel):
             port=self.port,
             database=self.database,
         )
+
+
+class AnythingLLMConfig(BaseModel):
+    """Configuration for AnythingLLM REST API client"""
+
+    base_url: str
+    api_key: str | None = None
+    timeout: int = 30
+    max_retries: int = 3
+    headers: dict[str, str] | None = None
+
+    def get_headers(self) -> dict[str, str]:
+        """Get headers for API requests"""
+        headers = self.headers or {}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+        headers.setdefault("Content-Type", "application/json")
+        return headers

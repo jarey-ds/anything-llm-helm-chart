@@ -13,6 +13,8 @@ dependencies = [
     "psycopg[binary,pool]",
     "psycopg2-binary",
     "kink",
+    "httpx",
+    "pydantic",
 ]
 
 [build-system]

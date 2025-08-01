@@ -4,10 +4,11 @@ from pathlib import Path
 import pytest
 from alembic import command
 from alembic.config import Config
-from artemis_model_catalogue_repository.config import AsyncPostgresConf
 from kink import di
 from sqlalchemy import text
 from testcontainers.postgres import PostgresContainer
+
+from sso_anythingllm_repository.config import AsyncPostgresConf
 
 MIGRATIONS_PATH = Path(__file__).parents[1] / "migrations"
 ALEMBIC_INI_PATH = Path(__file__).parents[3] / "alembic.ini"
@@ -47,11 +48,11 @@ def test_migrations_up_and_down(alembic_cfg):
     db_conf: AsyncPostgresConf = di[AsyncPostgresConf]
     engine = db_conf.sync_engine
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT tablename FROM pg_tables WHERE tablename='model_type_enum';"))
+        result = conn.execute(text("SELECT tablename FROM pg_tables WHERE tablename='anythingllm_user';"))
         assert result.first() is not None
 
     # Downgrade to base
     command.downgrade(alembic_cfg, "base")
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT tablename FROM pg_tables WHERE tablename='model_type_enum';"))
+        result = conn.execute(text("SELECT tablename FROM pg_tables WHERE tablename='anythingllm_user';"))
         assert result.first() is None
