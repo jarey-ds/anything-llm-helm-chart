@@ -43,6 +43,7 @@ services:
       # keycloak y anythingllm
       KEYCLOAK_ANYTHING_LLM_ID_CLAIM: preferred_username
       KEYCLOAK_ANYTHING_LLM_USERNAME_CLAIM: preferred_username
+      KEYCLOAK_ANYTHING_LLM_GROUP_CLAIM: groups
       KEYCLOAK_ANYTHING_LLM_GROUP_CORRELATIONS: "anything_llm_manager;manager,anything_llm_default;default,anything_llm_admin;admin"
       # AnythingLLM API config for consumer
       ANYTHING_LLM_URL: https://llm.example.com/

@@ -6,8 +6,8 @@ from urllib.parse import urljoin
 import httpx
 from httpx import ConnectError, RequestError, TimeoutException
 
-from .config import AnythingLLMConfig
-from .exceptions import AnythingLLMRepositoryError, AuthenticationError, NetworkError
+from sso_anythingllm_repository.config import AnythingLLMConfig
+from sso_anythingllm_repository.exceptions import AnythingLLMRepositoryError, AuthenticationError, NetworkError
 
 
 class AnythingLLMRepository:
