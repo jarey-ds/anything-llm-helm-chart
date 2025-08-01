@@ -139,3 +139,14 @@ class AnythingLLMRepository:
 
     async def upload_document(self, workspace_id: str, document_data: Dict[str, Any]) -> Dict[str, Any]:
         return await self.post(f"/api/v1/workspaces/{workspace_id}/documents", json_data=document_data)
+
+    async def obtain_auth_token(self, credentials_data: Dict[str, str]) -> Dict[str, Any]:
+        return await self.post("/api/request-token", json_data=credentials_data)
+
+    async def create_api_key(
+        self,
+    ) -> Dict[str, Any]:
+        return await self.post("/api/admin/generate-api-key")
+
+    async def issue_auth_token(self, user_id: int) -> Dict[str, Any]:
+        return await self.get(f"/api/v1/users/{user_id}/issue-auth-token")
