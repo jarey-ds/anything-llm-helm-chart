@@ -40,6 +40,15 @@ services:
       POSTGRES_USER: sso-anythingllm
       POSTGRES_PASSWORD: sso-anythingllm123
       POSTGRES_DB: sso_anythingllm
+      # keycloak y anythingllm
+      KEYCLOAK_ANYTHING_LLM_ID_CLAIM: preferred_username
+      KEYCLOAK_ANYTHING_LLM_USERNAME_CLAIM: preferred_username
+      KEYCLOAK_ANYTHING_LLM_GROUP_CORRELATIONS: "anything_llm_manager;manager,anything_llm_default;default,anything_llm_admin;admin"
+      # AnythingLLM API config for consumer
+      ANYTHING_LLM_URL: https://llm.example.com/
+      ANYTHING_LLM_ADMIN_USER: admin
+      ANYTHING_LLM_ADMIN_PASSWORD: administrador
+      
     ports:
       - 8000:8000
 

@@ -5,9 +5,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class KeycloakTokenConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="KEYCLOAK_ANYTING_LLM_", enable_decoding=False)
+    model_config = SettingsConfigDict(env_prefix="KEYCLOAK_ANYTHING_LLM_", enable_decoding=False)
 
     group_correlations: Dict[str, str]
+    # unique ID used for users in the keycloak token.
+    id_claim: str
+    # username property in the JWT token (preferred_username etc).
+    username_claim: str
 
     @field_validator("group_correlations", mode="before")
     @classmethod
@@ -18,6 +22,6 @@ class KeycloakTokenConfig(BaseSettings):
         # KEYCLOAK_ANYTING_LLM_GROUP_CORRELATIONS=
         # keycloak_admin,admin;my_other_keycloak_group,manager;other_keycloak_group_default,default
         # Processing logic is:
-        # Split by ; to get the key->values pairs as a string.
-        # For each key->value pair string-based entry, split by "," to get the value and the pair as different strings.
-        return {str(x.split(",")[0]): str(x.split(",")[1]) for x in v.split(";")}
+        # Split by , to get the key->values pairs as a string.
+        # For each key->value pair string-based entry, split by ";" to get the value and the pair as different strings.
+        return {str(x.split(";")[0]): str(x.split(";")[1]) for x in v.split(",")}
