@@ -6,12 +6,12 @@ from typing import Annotated
 # ────────────────────────────────────────── imports ────────────────────────────────────────── #
 from fastapi import APIRouter, Depends, FastAPI
 from fastapi.security import OAuth2
-from kink import di
 from pydantic import BaseModel
 from starlette.status import HTTP_200_OK
 
 from sso_anythingllm_dto.user import KeycloakUserDto
 from sso_anythingllm_facade.interfaces.sso_facade_interface import SSOFacadeInterface
+from sso_anythingllm_rest.dependencies import LazySingleton
 
 # ───────────────────────────────────────────────────────────────────────────────────────────── #
 #                                    API Router Configuration                                   #
@@ -20,7 +20,7 @@ from sso_anythingllm_facade.interfaces.sso_facade_interface import SSOFacadeInte
 ROUTER_TAG = "SSO Integration"
 router = APIRouter()
 
-sso_facade: SSOFacadeInterface = di[SSOFacadeInterface]
+sso_facade = LazySingleton(SSOFacadeInterface)
 
 # Create mapper instances at module level for reuse
 # provider_instance_dto_to_to_mapper = ProviderInstanceDtoToProviderToMapper()
