@@ -47,6 +47,29 @@ class TestAnythingLLMRepository:
         assert url == "https://api.anythingllm.com/api/v1/workspaces"
 
     @pytest.mark.asyncio
+    async def test_get_auth_headers_with_api_key(self, repository):
+        """Test auth headers with API key from config"""
+        headers = repository._get_auth_headers()
+        assert headers["Authorization"] == "Bearer test-api-key"
+        assert headers["Content-Type"] == "application/json"
+
+    @pytest.mark.asyncio
+    async def test_get_auth_headers_with_token(self, repository):
+        """Test auth headers with provided token"""
+        headers = repository._get_auth_headers("jwt-token-123")
+        assert headers["Authorization"] == "Bearer jwt-token-123"
+        assert headers["Content-Type"] == "application/json"
+
+    @pytest.mark.asyncio
+    async def test_get_auth_headers_no_auth(self, config):
+        """Test auth headers without API key or token"""
+        config.api_key = None
+        repo = AnythingLLMRepository(config)
+        headers = repo._get_auth_headers()
+        assert "Authorization" not in headers
+        assert headers["Content-Type"] == "application/json"
+
+    @pytest.mark.asyncio
     async def test_successful_get_request(self, repository):
         """Test successful GET request"""
         mock_response = MagicMock()
@@ -60,6 +83,22 @@ class TestAnythingLLMRepository:
             assert result == {"workspaces": []}
 
     @pytest.mark.asyncio
+    async def test_successful_get_request_with_token(self, repository):
+        """Test successful GET request with auth token"""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"workspaces": []}
+        mock_response.content = b'{"workspaces": []}'
+
+        await repository._ensure_client()
+        with patch.object(repository._client, "request", return_value=mock_response) as mock_request:
+            result = await repository.get("/api/v1/workspaces", auth_token="jwt-token-123")
+            assert result == {"workspaces": []}
+            # Verify the request was made with the correct auth header
+            call_args = mock_request.call_args
+            assert call_args[1]["headers"]["Authorization"] == "Bearer jwt-token-123"
+
+    @pytest.mark.asyncio
     async def test_successful_post_request(self, repository):
         """Test successful POST request"""
         mock_response = MagicMock()
@@ -71,6 +110,24 @@ class TestAnythingLLMRepository:
         with patch.object(repository._client, "request", return_value=mock_response):
             result = await repository.post("/api/v1/workspaces", json_data={"name": "Test Workspace"})
             assert result == {"id": "123", "name": "Test Workspace"}
+
+    @pytest.mark.asyncio
+    async def test_successful_post_request_with_token(self, repository):
+        """Test successful POST request with auth token"""
+        mock_response = MagicMock()
+        mock_response.status_code = 201
+        mock_response.json.return_value = {"id": "123", "name": "Test Workspace"}
+        mock_response.content = b'{"id": "123", "name": "Test Workspace"}'
+
+        await repository._ensure_client()
+        with patch.object(repository._client, "request", return_value=mock_response) as mock_request:
+            result = await repository.post(
+                "/api/v1/workspaces", json_data={"name": "Test Workspace"}, auth_token="jwt-token-123"
+            )
+            assert result == {"id": "123", "name": "Test Workspace"}
+            # Verify the request was made with the correct auth header
+            call_args = mock_request.call_args
+            assert call_args[1]["headers"]["Authorization"] == "Bearer jwt-token-123"
 
     @pytest.mark.asyncio
     async def test_successful_delete_request(self, repository):
@@ -176,6 +233,40 @@ class TestAnythingLLMRepository:
             # Test upload_document
             result = await repository.upload_document("123", {"name": "test.pdf"})
             assert result == {"workspaces": []}
+
+    @pytest.mark.asyncio
+    async def test_business_logic_methods(self, repository):
+        """Test business logic methods"""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"success": True}
+        mock_response.content = b'{"success": true}'
+
+        await repository._ensure_client()
+        with patch.object(repository._client, "request", return_value=mock_response):
+            # Test obtain_auth_token
+            result = await repository.obtain_auth_token({"username": "test", "password": "test"})
+            assert result == {"success": True}
+
+            # Test create_api_key
+            result = await repository.create_api_key()
+            assert result == {"success": True}
+
+            # Test create_user
+            result = await repository.create_user({"username": "test", "email": "test@example.com"})
+            assert result == {"success": True}
+
+            # Test update_user
+            result = await repository.update_user(1, {"username": "updated"})
+            assert result == {"success": True}
+
+            # Test delete_user
+            result = await repository.delete_user(1)
+            assert result == {"success": True}
+
+            # Test issue_auth_token
+            result = await repository.issue_auth_token(1)
+            assert result == {"success": True}
 
     @pytest.mark.asyncio
     async def test_close_client(self, repository):

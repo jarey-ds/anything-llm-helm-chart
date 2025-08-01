@@ -43,6 +43,18 @@ class AnythingLLMRepository:
     def _build_url(self, endpoint: str) -> str:
         return urljoin(self.config.base_url, endpoint.lstrip("/"))
 
+    def _get_auth_headers(self, auth_token: Optional[str] = None) -> Dict[str, str]:
+        """Get authentication headers for requests"""
+        headers = self.config.get_headers().copy()
+
+        # If auth_token is provided, use it; otherwise use config API key
+        if auth_token:
+            headers["Authorization"] = f"Bearer {auth_token}"
+        elif self.config.api_key:
+            headers["Authorization"] = f"Bearer {self.config.api_key}"
+
+        return headers
+
     async def _make_request(
         self,
         method: str,
@@ -50,15 +62,26 @@ class AnythingLLMRepository:
         params: Optional[Dict[str, Any]] = None,
         data: Optional[Dict[str, Any]] = None,
         json_data: Optional[Dict[str, Any]] = None,
+        auth_token: Optional[str] = None,
         **kwargs,
     ) -> Dict[str, Any]:
         await self._ensure_client()
         url = self._build_url(endpoint)
+
+        # Get authentication headers
+        auth_headers = self._get_auth_headers(auth_token)
+
         request_kwargs = {"params": params, **kwargs}
         if data is not None:
             request_kwargs["data"] = data
         if json_data is not None:
             request_kwargs["json"] = json_data
+
+        # Merge auth headers with request headers
+        if "headers" in request_kwargs:
+            request_kwargs["headers"].update(auth_headers)
+        else:
+            request_kwargs["headers"] = auth_headers
 
         for attempt in range(self.config.max_retries + 1):
             try:
@@ -101,64 +124,91 @@ class AnythingLLMRepository:
                 raise NetworkError(f"Request error: {e}") from e
         raise NetworkError(f"Request failed after {self.config.max_retries} retries")
 
-    async def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        return await self._make_request("GET", endpoint, params=params)
+    async def get(
+        self, endpoint: str, params: Optional[Dict[str, Any]] = None, auth_token: Optional[str] = None
+    ) -> Dict[str, Any]:
+        return await self._make_request("GET", endpoint, params=params, auth_token=auth_token)
 
     async def post(
-        self, endpoint: str, data: Optional[Dict[str, Any]] = None, json_data: Optional[Dict[str, Any]] = None
+        self,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None,
+        json_data: Optional[Dict[str, Any]] = None,
+        auth_token: Optional[str] = None,
     ) -> Dict[str, Any]:
-        return await self._make_request("POST", endpoint, data=data, json_data=json_data)
+        return await self._make_request("POST", endpoint, data=data, json_data=json_data, auth_token=auth_token)
 
-    async def delete(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        return await self._make_request("DELETE", endpoint, params=params)
+    async def delete(
+        self, endpoint: str, params: Optional[Dict[str, Any]] = None, auth_token: Optional[str] = None
+    ) -> Dict[str, Any]:
+        return await self._make_request("DELETE", endpoint, params=params, auth_token=auth_token)
 
     async def put(
-        self, endpoint: str, data: Optional[Dict[str, Any]] = None, json_data: Optional[Dict[str, Any]] = None
+        self,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None,
+        json_data: Optional[Dict[str, Any]] = None,
+        auth_token: Optional[str] = None,
     ) -> Dict[str, Any]:
-        return await self._make_request("PUT", endpoint, data=data, json_data=json_data)
+        return await self._make_request("PUT", endpoint, data=data, json_data=json_data, auth_token=auth_token)
 
     async def patch(
-        self, endpoint: str, data: Optional[Dict[str, Any]] = None, json_data: Optional[Dict[str, Any]] = None
+        self,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None,
+        json_data: Optional[Dict[str, Any]] = None,
+        auth_token: Optional[str] = None,
     ) -> Dict[str, Any]:
-        return await self._make_request("PATCH", endpoint, data=data, json_data=json_data)
+        return await self._make_request("PATCH", endpoint, data=data, json_data=json_data, auth_token=auth_token)
 
-    async def get_workspaces(self) -> Dict[str, Any]:
-        return await self.get("/api/v1/workspaces")
+    async def get_workspaces(self, auth_token: Optional[str] = None) -> Dict[str, Any]:
+        return await self.get("/api/v1/workspaces", auth_token=auth_token)
 
-    async def get_workspace(self, workspace_id: str) -> Dict[str, Any]:
-        return await self.get(f"/api/v1/workspaces/{workspace_id}")
+    async def get_workspace(self, workspace_id: str, auth_token: Optional[str] = None) -> Dict[str, Any]:
+        return await self.get(f"/api/v1/workspaces/{workspace_id}", auth_token=auth_token)
 
-    async def create_workspace(self, workspace_data: Dict[str, Any]) -> Dict[str, Any]:
-        return await self.post("/api/v1/workspaces", json_data=workspace_data)
+    async def create_workspace(
+        self, workspace_data: Dict[str, Any], auth_token: Optional[str] = None
+    ) -> Dict[str, Any]:
+        return await self.post("/api/v1/workspaces", json_data=workspace_data, auth_token=auth_token)
 
-    async def delete_workspace(self, workspace_id: str) -> Dict[str, Any]:
-        return await self.delete(f"/api/v1/workspaces/{workspace_id}")
+    async def delete_workspace(self, workspace_id: str, auth_token: Optional[str] = None) -> Dict[str, Any]:
+        return await self.delete(f"/api/v1/workspaces/{workspace_id}", auth_token=auth_token)
 
-    async def get_documents(self, workspace_id: str) -> Dict[str, Any]:
-        return await self.get(f"/api/v1/workspaces/{workspace_id}/documents")
+    async def get_documents(self, workspace_id: str, auth_token: Optional[str] = None) -> Dict[str, Any]:
+        return await self.get(f"/api/v1/workspaces/{workspace_id}/documents", auth_token=auth_token)
 
-    async def upload_document(self, workspace_id: str, document_data: Dict[str, Any]) -> Dict[str, Any]:
-        return await self.post(f"/api/v1/workspaces/{workspace_id}/documents", json_data=document_data)
+    async def upload_document(
+        self, workspace_id: str, document_data: Dict[str, Any], auth_token: Optional[str] = None
+    ) -> Dict[str, Any]:
+        return await self.post(
+            f"/api/v1/workspaces/{workspace_id}/documents", json_data=document_data, auth_token=auth_token
+        )
 
     # ----------------------------  Especific methods to use in bussines logic ---------------------------------------
 
-    async def obtain_auth_token(self, credentials_data: Dict[str, str]) -> Dict[str, Any]:
-        return await self.post("/api/request-token", json_data=credentials_data)
+    async def obtain_auth_token(
+        self, credentials_data: Dict[str, str], auth_token: Optional[str] = None
+    ) -> Dict[str, Any]:
+        return await self.post("/api/request-token", json_data=credentials_data, auth_token=auth_token)
 
-    async def create_api_key(self) -> Dict[str, Any]:
-        return await self.post("/api/admin/generate-api-key")
+    async def create_api_key(self, auth_token: Optional[str] = None) -> Dict[str, Any]:
+        return await self.post("/api/admin/generate-api-key", auth_token=auth_token)
 
-    async def create_user(self, user_data: Dict[str, str]) -> Dict[str, Any]:
-        return await self.post("/api/v1/admin/users/new", json_data=user_data)
+    async def create_user(self, user_data: Dict[str, str], auth_token: Optional[str] = None) -> Dict[str, Any]:
+        return await self.post("/api/v1/admin/users/new", json_data=user_data, auth_token=auth_token)
 
-    async def update_user(self, user_id: int, user_data: Dict[str, str]) -> Dict[str, Any]:
-        return await self.post(f"/api/v1/admin/users/{user_id}", json_data=user_data)
+    async def update_user(
+        self, user_id: int, user_data: Dict[str, str], auth_token: Optional[str] = None
+    ) -> Dict[str, Any]:
+        return await self.post(f"/api/v1/admin/users/{user_id}", json_data=user_data, auth_token=auth_token)
 
     async def delete_user(
         self,
         user_id: int,
+        auth_token: Optional[str] = None,
     ) -> Dict[str, Any]:
-        return await self.delete(f"/api/v1/admin/users/{user_id}")
+        return await self.delete(f"/api/v1/admin/users/{user_id}", auth_token=auth_token)
 
-    async def issue_auth_token(self, user_id: int) -> Dict[str, Any]:
-        return await self.get(f"/api/v1/users/{user_id}/issue-auth-token")
+    async def issue_auth_token(self, user_id: int, auth_token: Optional[str] = None) -> Dict[str, Any]:
+        return await self.get(f"/api/v1/users/{user_id}/issue-auth-token", auth_token=auth_token)
