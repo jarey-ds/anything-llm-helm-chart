@@ -37,6 +37,9 @@ services:
         - pip-config
     environment:
       POSTGRES_HOST: postgres
+      POSTGRES_USER: sso-anythingllm
+      POSTGRES_PASSWORD: sso-anythingllm123
+      POSTGRES_DB: sso_anythingllm
     ports:
       - 8000:8000
 

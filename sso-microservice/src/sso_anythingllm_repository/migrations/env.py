@@ -33,16 +33,20 @@ target_metadata = [
 
 
 def get_db_config() -> AsyncPostgresConf:
+    print("Entering GET DB CONFIG")
     try:
         async_postgres_conf = di[AsyncPostgresConf]
+        print("Config was obtained from DI correctly")
     except Exception:
+        print("Exception happened and config is obtained from os envs")
         async_postgres_conf: AsyncPostgresConf = AsyncPostgresConf(
-            username=os.environ.get("POSTGRES_USER", "sso_anythingllm"),
-            password=os.environ.get("POSTGRES_PASSWORD", "sso_anythingllm123"),
+            username=os.environ.get("POSTGRES_USER", "sso-anythingllm"),
+            password=os.environ.get("POSTGRES_PASSWORD", "sso-anythingllm123"),
             database=os.environ.get("POSTGRES_DB", "sso_anythingllm"),
             host=os.environ.get("POSTGRES_HOST", "localhost"),
             port=int(os.environ.get("POSTGRES_PORT", 5432)),
         )
+
     return async_postgres_conf
 
 
