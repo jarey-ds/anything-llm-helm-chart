@@ -1,9 +1,15 @@
-from core_persistence_sqlalchemy.config import SQLAlchemyConfig
+from pydantic import BaseModel
 from sqlalchemy import URL, Engine, create_engine
 from sqlalchemy.ext.asyncio.engine import AsyncEngine, create_async_engine
 
 
-class AsyncPostgresConf(SQLAlchemyConfig):
+class AsyncPostgresConf(BaseModel):
+    username: str
+    password: str
+    host: str
+    port: int
+    database: str
+
     @property
     def engine(self) -> AsyncEngine:
         """SQLAlchemy engine"""
