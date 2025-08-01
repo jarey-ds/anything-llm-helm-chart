@@ -1,11 +1,15 @@
 """Model instance facade module for orchestrating model instance operations."""
 
+from kink import inject
+
 from sso_anythingllm_dto.user import KeycloakUserDto
+from sso_anythingllm_facade.interfaces import SSOFacadeInterface
 from sso_anythingllm_service.interfaces.sso_service_interface import SSOServiceInterface
 from sso_anythingllm_service.interfaces.user_service_interface import UserServiceInterface
 
 
-class SSOFacade(SSOServiceInterface):
+@inject(alias=SSOFacadeInterface)
+class SSOFacade(SSOFacadeInterface):
     """Facade for orchestrating SSO use-case operations."""
 
     def __init__(

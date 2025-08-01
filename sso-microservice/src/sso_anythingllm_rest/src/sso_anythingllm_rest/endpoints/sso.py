@@ -36,12 +36,12 @@ class User(BaseModel):
     disabled: bool | None = None
 
 
-def fake_decode_token(token):
+def decode_token(token):
     return User(username=token + "fakedecoded", email="john@example.com", full_name="John Doe")
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-    user = fake_decode_token(token)
+    user = decode_token(token)
     return user
 
 
@@ -73,7 +73,8 @@ async def get_sso_url(current_user: Annotated[User, Depends(get_current_user)]) 
     # Extract information from the token
     user_dto: KeycloakUserDto = KeycloakUserDto(id="aloha", name="Jose", groups=["admin"])
     # Get the URL
-    url = await sso_facade.get_anything_llm_sso_url(user=user_dto)
+    # url = await sso_facade.get_anything_llm_sso_url(user=user_dto)
 
     # Provide the URL as a result
-    return url
+    user_dto.model_dump()
+    return str(current_user.model_dump())
