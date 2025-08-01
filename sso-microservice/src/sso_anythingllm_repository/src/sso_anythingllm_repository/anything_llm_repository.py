@@ -140,13 +140,25 @@ class AnythingLLMRepository:
     async def upload_document(self, workspace_id: str, document_data: Dict[str, Any]) -> Dict[str, Any]:
         return await self.post(f"/api/v1/workspaces/{workspace_id}/documents", json_data=document_data)
 
+    # ----------------------------  Especific methods to use in bussines logic ---------------------------------------
+
     async def obtain_auth_token(self, credentials_data: Dict[str, str]) -> Dict[str, Any]:
         return await self.post("/api/request-token", json_data=credentials_data)
 
-    async def create_api_key(
-        self,
-    ) -> Dict[str, Any]:
+    async def create_api_key(self) -> Dict[str, Any]:
         return await self.post("/api/admin/generate-api-key")
+
+    async def create_user(self, user_data: Dict[str, str]) -> Dict[str, Any]:
+        return await self.post("/api/v1/admin/users/new", json_data=user_data)
+
+    async def update_user(self, user_id: int, user_data: Dict[str, str]) -> Dict[str, Any]:
+        return await self.post(f"/api/v1/admin/users/{user_id}", json_data=user_data)
+
+    async def delete_user(
+        self,
+        user_id: int,
+    ) -> Dict[str, Any]:
+        return await self.delete(f"/api/v1/admin/users/{user_id}")
 
     async def issue_auth_token(self, user_id: int) -> Dict[str, Any]:
         return await self.get(f"/api/v1/users/{user_id}/issue-auth-token")
