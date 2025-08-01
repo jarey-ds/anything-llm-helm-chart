@@ -2,12 +2,9 @@ from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
+from httpx import ConnectError, TimeoutException
 
-from sso_anythingllm_repository.anything_llm_repository import (
-    AnythingLLMRepository,
-    ConnectError,
-    TimeoutException,
-)
+from sso_anythingllm_repository.anything_llm_repository import AnythingLLMRepository
 from sso_anythingllm_repository.config import AnythingLLMConfig
 from sso_anythingllm_repository.exceptions import AnythingLLMRepositoryError, AuthenticationError, NetworkError
 

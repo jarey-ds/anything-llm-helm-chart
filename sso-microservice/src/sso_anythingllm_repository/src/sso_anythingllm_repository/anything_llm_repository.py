@@ -4,25 +4,7 @@ from typing import Any, Dict, Optional
 from urllib.parse import urljoin
 
 import httpx
-
-try:
-    TimeoutException = httpx.TimeoutException
-    ConnectError = httpx.ConnectError
-    RequestError = httpx.RequestError
-except AttributeError:
-    try:
-        from httpx._exceptions import ConnectError, RequestError, TimeoutException
-    except ImportError:
-
-        class TimeoutException(Exception):
-            pass
-
-        class ConnectError(Exception):
-            pass
-
-        class RequestError(Exception):
-            pass
-
+from httpx import ConnectError, RequestError, TimeoutException
 
 from .config import AnythingLLMConfig
 from .exceptions import AnythingLLMRepositoryError, AuthenticationError, NetworkError
