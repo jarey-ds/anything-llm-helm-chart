@@ -161,3 +161,125 @@ nvidia-device-plugin:
       effect: "NoSchedule"
   # nodeSelector:
   #   nvidia.com/gpu: "true"
+
+###### SSO MICROSERVICE ######
+sso:
+  # -- Enable SSO microservice deployment
+  enabled: false
+  
+  # -- Number of pod replicas to deploy
+  replicaCount: 1
+  
+  # -- Configuration for the Docker image used by the SSO microservice
+  image:
+    # -- The Docker repository to pull the image from
+    repository: sso-anythingllm
+    # -- The specific tag of the image to use
+    tag: latest
+    # -- The pull policy for the image
+    pullPolicy: IfNotPresent
+  
+  # -- Service configuration for SSO microservice
+  service:
+    # -- Service type
+    type: ClusterIP
+    # -- Service port
+    port: 8000
+  
+  # -- Ingress configuration for SSO microservice
+  ingress:
+    # -- Enable ingress for SSO microservice
+    enabled: false
+    # -- Ingress annotations
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      cert-manager.io/cluster-issuer: letsencrypt-dns
+      cert-manager.io/renew-before: 360h
+    # -- Ingress class name
+    ingressClassName: nginx
+    # -- Ingress hosts
+    hosts:
+      - host: sso.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    # -- TLS configuration for ingress
+    tls:
+      - hosts:
+          - sso.example.com
+        secretName: sso-anythingllm-tls
+  
+  # -- Configuration for the SSO microservice
+  config:
+    # -- PostgreSQL configuration
+    POSTGRES_HOST: "{{ .Release.Name }}-postgresql"
+    POSTGRES_USER: "sso-anythingllm"
+    POSTGRES_PASSWORD: "sso-anythingllm123"
+    POSTGRES_DB: "sso-anythingllm"
+    # -- Keycloak configuration
+    KEYCLOAK_ANYTHING_LLM_ID_CLAIM: "preferred_username"
+    KEYCLOAK_ANYTHING_LLM_USERNAME_CLAIM: "preferred_username"
+    KEYCLOAK_ANYTHING_LLM_GROUP_CLAIM: "groups"
+    KEYCLOAK_ANYTHING_LLM_GROUP_CORRELATIONS: "anything_llm_manager;manager,anything_llm_default;default,anything_llm_admin;admin"
+    # -- AnythingLLM API configuration
+    ANYTHING_LLM_URL: "https://llm.example.com"
+    ANYTHING_LLM_ADMIN_USER: "admin"
+    ANYTHING_LLM_ADMIN_PASSWORD: "administrador"
+    ANYTHING_LLM_VERIFY_SSL: "false"
+  
+  # -- Resources for SSO microservice
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  
+  # -- Node selector for SSO microservice
+  # nodeSelector: {}
+  
+  # -- Affinity for SSO microservice
+  # affinity: {}
+  
+  # -- Tolerations for SSO microservice
+  # tolerations: []
+  
+  # -- PostgreSQL deployment configuration
+  postgresql:
+    # -- Enable PostgreSQL deployment
+    enabled: false
+    # -- PostgreSQL configuration
+    auth:
+      postgresPassword: "sso-anythingllm123"
+      database: "sso-anythingllm"
+      username: "sso-anythingllm"
+      password: "sso-anythingllm123"
+    # -- PostgreSQL service configuration
+    service:
+      type: ClusterIP
+      port: 5432
+    # -- PostgreSQL persistence configuration
+    primary:
+      persistence:
+        enabled: true
+        size: 8Gi
+        storageClass: ""
+    # -- PostgreSQL resources
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+    # -- PostgreSQL architecture
+    architecture: standalone
+    # -- PostgreSQL image configuration
+    image:
+      registry: docker.io
+      repository: bitnami/postgresql
+      tag: "16.2.0"
+    # -- PostgreSQL metrics
+    metrics:
+      enabled: false

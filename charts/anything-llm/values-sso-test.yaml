@@ -1,0 +1,100 @@
+# Test values for SSO microservice deployment
+# This file demonstrates how to enable the SSO microservice and PostgreSQL
+
+# Enable SSO microservice
+sso:
+  enabled: true
+  
+  # Configure the SSO microservice image
+  image:
+    repository: sso-microservice-sso-anythingllm
+    tag: latest
+    pullPolicy: Never
+  
+  # Configure the SSO microservice service
+  service:
+    type: ClusterIP
+    port: 8000
+  
+  # Configure the SSO microservice ingress (optional)
+  ingress:
+    enabled: true
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      cert-manager.io/cluster-issuer: letsencrypt-dns
+      cert-manager.io/renew-before: 360h
+    ingressClassName: nginx
+    hosts:
+      - host: sso.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - hosts:
+          - sso.example.com
+        secretName: sso-anythingllm-tls
+  
+  # Configure the SSO microservice
+  config:
+    # PostgreSQL configuration
+    POSTGRES_HOST: "{{ .Release.Name }}-postgresql"
+    POSTGRES_USER: "sso-anythingllm"
+    POSTGRES_PASSWORD: "sso-anythingllm123"
+    POSTGRES_DB: "sso-anythingllm"
+    # Keycloak configuration
+    KEYCLOAK_ANYTHING_LLM_ID_CLAIM: "preferred_username"
+    KEYCLOAK_ANYTHING_LLM_USERNAME_CLAIM: "preferred_username"
+    KEYCLOAK_ANYTHING_LLM_GROUP_CLAIM: "groups"
+    KEYCLOAK_ANYTHING_LLM_GROUP_CORRELATIONS: "anything_llm_manager;manager,anything_llm_default;default,anything_llm_admin;admin"
+    # AnythingLLM API configuration
+    ANYTHING_LLM_URL: "https://llm.example.com"
+    ANYTHING_LLM_ADMIN_USER: "admin"
+    ANYTHING_LLM_ADMIN_PASSWORD: "administrador"
+    ANYTHING_LLM_VERIFY_SSL: "false"
+  
+  # Resources for SSO microservice
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  
+  # Enable PostgreSQL deployment
+  postgresql:
+    enabled: true
+    # PostgreSQL configuration
+    auth:
+      postgresPassword: "sso-anythingllm123"
+      database: "sso-anythingllm"
+      username: "sso-anythingllm"
+      password: "sso-anythingllm123"
+    # PostgreSQL service configuration
+    service:
+      type: ClusterIP
+      port: 5432
+    # PostgreSQL persistence configuration
+    primary:
+      persistence:
+        enabled: true
+        size: 8Gi
+        storageClass: ""
+    # PostgreSQL resources
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+    # PostgreSQL architecture
+    architecture: standalone
+    # PostgreSQL image configuration
+    image:
+      registry: docker.io
+      repository: bitnami/postgresql
+      tag: "16.2.0"
+    # PostgreSQL metrics
+    metrics:
+      enabled: false 

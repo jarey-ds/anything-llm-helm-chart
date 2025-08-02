@@ -1,0 +1,23 @@
+{{- if .Values.sso.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "anything-llm.fullname" . }}-sso
+  labels:
+    {{- include "anything-llm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sso
+  {{- with .Values.sso.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.sso.service.type }}
+  ports:
+    - port: {{ .Values.sso.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "anything-llm.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: sso
+{{- end }} 
