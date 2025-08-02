@@ -1,4 +1,3 @@
-import asyncio
 from typing import AsyncGenerator
 
 import pytest
@@ -15,20 +14,9 @@ from testcontainers.postgres import PostgresContainer
 from sso_anythingllm_repository.config import AsyncPostgresConf
 
 
-# Event loop fixture - MUST be defined at session scope
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create a single event loop for the entire test session."""
-    policy = asyncio.get_event_loop_policy()
-    loop = policy.new_event_loop()
-    asyncio.set_event_loop(loop)
-    yield loop
-    loop.close()
-
-
 # Combined fixture for creating DB container and tables
 @pytest_asyncio.fixture(scope="session")
-async def test_db(event_loop) -> AsyncGenerator[AsyncPostgresConf, None]:
+async def test_db() -> AsyncGenerator[AsyncPostgresConf, None]:
     """
     Set up a test PostgreSQL container and create all tables.
     """
@@ -85,8 +73,8 @@ async def test_db(event_loop) -> AsyncGenerator[AsyncPostgresConf, None]:
 
 
 # Create a shared async engine at session scope
-@pytest.fixture(scope="session")
-def async_engine(test_db, event_loop):
+@pytest_asyncio.fixture(scope="session")
+async def async_engine(test_db):
     """Create a shared async engine using the session-scoped event loop."""
     engine = create_async_engine(
         test_db.url,
@@ -95,10 +83,7 @@ def async_engine(test_db, event_loop):
     yield engine
 
     # Close engine when test session ends
-    async def close_engine():
-        await engine.dispose()
-
-    event_loop.run_until_complete(close_engine())
+    await engine.dispose()
 
 
 # Fixture for AsyncSession
