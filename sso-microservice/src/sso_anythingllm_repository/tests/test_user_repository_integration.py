@@ -8,7 +8,6 @@ This test suite:
 4. Verifies data persistence and retrieval
 """
 
-import asyncio
 import time
 from pathlib import Path
 from typing import AsyncGenerator
@@ -31,18 +30,8 @@ MIGRATIONS_PATH = Path(__file__).parents[1] / "migrations"
 ALEMBIC_INI_PATH = Path(__file__).parents[3] / "alembic.ini"
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create a single event loop for the entire test session."""
-    policy = asyncio.get_event_loop_policy()
-    loop = policy.new_event_loop()
-    asyncio.set_event_loop(loop)
-    yield loop
-    loop.close()
-
-
 @pytest_asyncio.fixture(scope="session")
-async def postgres_container(event_loop) -> AsyncGenerator[PostgresContainer, None]:
+async def postgres_container() -> AsyncGenerator[PostgresContainer, None]:
     """Start and configure PostgreSQL container for integration tests."""
     # Start PostgreSQL container
     postgres_container = PostgresContainer("postgres:15").with_bind_ports(5432)
