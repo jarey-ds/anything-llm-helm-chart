@@ -48,6 +48,7 @@ class AnythingLLMConfig(BaseModel):
     timeout: int = 30
     max_retries: int = 3
     headers: dict[str, str] | None = None
+    verify_ssl: bool = True
 
     def get_headers(self) -> dict[str, str]:
         """Get headers for API requests"""

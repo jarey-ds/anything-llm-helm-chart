@@ -10,3 +10,4 @@ class AnythingLLMConfig(BaseSettings):
     url: str
     admin_user: str
     admin_password: str
+    verify_ssl: bool = True

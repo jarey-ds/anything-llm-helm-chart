@@ -3,6 +3,7 @@ import logging
 from dataclasses import dataclass
 
 from kink import inject
+from loguru import logger
 from pyctuator.health.health_provider import HealthDetails, HealthProvider, HealthStatus, Status
 
 from sso_anythingllm_dto.config.anything_llm import AnythingLLMConfig
@@ -51,6 +52,7 @@ class AnythingLlmApiHealthMonitor(HealthProvider):
             api_key=None,  # We don't need API key for auth token endpoint
             timeout=30,
             max_retries=3,
+            verify_ssl=self.anythingllm_config.verify_ssl,
         )
 
     def get_health(self) -> HealthStatus:
@@ -90,7 +92,8 @@ class AnythingLlmApiHealthMonitor(HealthProvider):
                 }
 
                 # Call the obtain_auth_token method to test API connectivity
-                await repo.obtain_auth_token(credentials)
+                response = await repo.obtain_auth_token(credentials)
+                logger.debug(f"Obtained token is: {response}")
 
                 # If we get here, the API is reachable
                 self.logger.debug("AnythingLLM API health check successful")
@@ -119,13 +122,21 @@ class AnythingLlmApiHealthMonitor(HealthProvider):
         except NetworkError as e:
             # Network/connection error
             self.logger.error(f"AnythingLLM API network error: {e}")
+            error_msg = str(e)
+
+            # Check if it's an SSL certificate error
+            if "CERTIFICATE_VERIFY_FAILED" in error_msg or "self-signed certificate" in error_msg:
+                error_msg = (
+                    f"SSL certificate verification failed. Consider setting ANYTHING_LLM_VERIFY_SSL=false: {error_msg}"
+                )
+
             return ApiHealthStatus(
                 status=Status.DOWN,
                 details=ApiHealthDetails(
-                    message="AnythingLLM API is reachable but authentication failed",
+                    message="Network error connecting to AnythingLLM API",
                     component="anythingllm-api",
                     url=self.anythingllm_config.url,
-                    error=str(e),
+                    error=error_msg,
                 ),
             )
 

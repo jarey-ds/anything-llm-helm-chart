@@ -32,7 +32,10 @@ class AnythingLLMRepository:
     async def _ensure_client(self):
         if self._client is None:
             self._client = httpx.AsyncClient(
-                base_url=self.config.base_url, headers=self.config.get_headers(), timeout=self.config.timeout
+                base_url=self.config.base_url,
+                headers=self.config.get_headers(),
+                timeout=self.config.timeout,
+                verify=self.config.verify_ssl,
             )
 
     async def close(self):

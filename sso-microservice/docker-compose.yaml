@@ -49,6 +49,7 @@ services:
       ANYTHING_LLM_URL: https://llm.example.com/
       ANYTHING_LLM_ADMIN_USER: admin
       ANYTHING_LLM_ADMIN_PASSWORD: administrador
+      ANYTHING_LLM_VERIFY_SSL: false
       
     ports:
       - 8000:8000

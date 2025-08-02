@@ -6,6 +6,7 @@ A comprehensive async REST API client for AnythingLLM with support for GET, POST
 
 - **Async HTTP Client**: Built on `httpx.AsyncClient` for high-performance async HTTP requests
 - **Configurable Arguments**: Support for custom URLs, headers, timeouts, and retry logic
+- **SSL Verification Control**: Option to disable SSL certificate verification for self-signed certificates
 - **Comprehensive Error Handling**: Custom exceptions for different error scenarios
 - **Retry Logic**: Exponential backoff with configurable retry attempts
 - **Context Manager Support**: Proper resource management with async context managers
@@ -33,7 +34,8 @@ async def main():
         base_url="http://localhost:3001",
         api_key="your-api-key-here",
         timeout=30,
-        max_retries=3
+        max_retries=3,
+        verify_ssl=False  # Disable SSL verification for self-signed certificates
     )
     
     # Use as async context manager
@@ -63,12 +65,34 @@ from sso_anythingllm_repository import AnythingLLMConfig
 config = AnythingLLMConfig(
     base_url="http://localhost:3001",      # Required: Base URL of AnythingLLM API
     api_key="your-api-key",                # Optional: API key for authentication
-    timeout=30,                            # Optional: Request timeout in seconds
-    max_retries=3,                         # Optional: Maximum retry attempts
-    headers={                              # Optional: Custom headers
-        "X-Custom-Header": "value"
-    }
+    timeout=30,                            # Optional: Request timeout in seconds (default: 30)
+    max_retries=3,                         # Optional: Maximum retry attempts (default: 3)
+    headers={"Custom-Header": "value"},    # Optional: Custom headers
+    verify_ssl=False,                      # Optional: Disable SSL verification for self-signed certs
 )
+```
+
+### SSL Certificate Verification
+
+For environments with self-signed certificates or internal CA certificates, you can disable SSL verification:
+
+```python
+# Disable SSL verification
+config = AnythingLLMConfig(
+    base_url="https://internal-anythingllm.company.com",
+    verify_ssl=False  # This will bypass SSL certificate verification
+)
+```
+
+**⚠️ Security Warning**: Disabling SSL verification should only be used in trusted internal networks or development environments. In production, it's recommended to properly configure SSL certificates.
+
+## Environment Variables
+
+You can also configure SSL verification using environment variables in the DTO configuration:
+
+```bash
+# Disable SSL verification via environment variable
+export ANYTHING_LLM_VERIFY_SSL=false
 ```
 
 ## API Methods
