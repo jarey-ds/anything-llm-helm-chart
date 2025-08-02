@@ -23,7 +23,7 @@ dependencies:
     version: 0.61.0
     repository: https://otwld.github.io/ollama-helm/
     condition: ollama.enabled
-  - name: postgresql
-    version: 13.2.30
-    repository: https://charts.bitnami.com/bitnami
-    condition: sso.postgresql.enabled
+  - condition: postgresql.enabled
+    name: postgresql
+    repository: oci://registry-1.docker.io/bitnamicharts
+    version: 16.x.x

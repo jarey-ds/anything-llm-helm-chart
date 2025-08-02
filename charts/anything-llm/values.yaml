@@ -209,7 +209,7 @@ sso:
           - sso.example.com
         secretName: sso-anythingllm-tls
   
-  # -- Configuration for the SSO microservice
+      # -- Configuration for the SSO microservice
   config:
     # -- PostgreSQL configuration
     POSTGRES_HOST: "postgresql"
@@ -253,8 +253,7 @@ sso:
     auth:
       postgresPassword: "sso-anythingllm123"
       database: "sso_anythingllm"
-      username: "postgres"
-      password: "sso-anythingllm123"
+      enablePostgresUser: true
     # -- PostgreSQL service configuration
     service:
       type: ClusterIP
@@ -265,6 +264,8 @@ sso:
         enabled: true
         size: 8Gi
         storageClass: ""
+
+
 
     # -- PostgreSQL resources
     resources:

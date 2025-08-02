@@ -59,7 +59,7 @@ sso:
   config:
     # PostgreSQL configuration
     POSTGRES_HOST: "postgresql"
-    POSTGRES_USER: "postgres"
+    POSTGRES_USER: "sso_anythingllm"
     POSTGRES_PASSWORD: "sso-anythingllm123"
     POSTGRES_DB: "sso_anythingllm"
     # Keycloak configuration
@@ -83,24 +83,26 @@ sso:
       memory: 256Mi
 
   # Enable PostgreSQL deployment
-  postgresql:
-    enabled: true
-    # PostgreSQL configuration
-    auth:
-      postgresPassword: "sso-anythingllm123"
-      database: "sso_anythingllm"
-      username: "postgres"
-      password: "sso-anythingllm123"
-    # PostgreSQL service configuration
-    service:
-      type: ClusterIP
-      port: 5432
-    # PostgreSQL persistence configuration
-    primary:
-      persistence:
-        enabled: true
-        size: 8Gi
-        storageClass: ""
+postgresql:
+  enabled: true
+  # PostgreSQL configuration
+  auth:
+    postgresPassword: "SuperSecretPGAdminPa55word!"
+    username: "sso_anythingllm"
+    password: "sso-anythingllm123"
+    database: "sso_anythingllm"
+  # PostgreSQL service configuration
+  service:
+    type: ClusterIP
+    port: 5432
+  # PostgreSQL persistence configuration
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+      storageClass: ""
+
+
 
     # PostgreSQL resources
     resources:

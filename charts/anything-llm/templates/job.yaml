@@ -1,4 +1,4 @@
-{{- if .Values.extras.enableMultiUserMode }}
+{{- if and .Values.extras .Values.extras.enableMultiUserMode }}
 {{- $fullName := include "anything-llm.fullname" . }}
 apiVersion: batch/v1
 kind: Job
