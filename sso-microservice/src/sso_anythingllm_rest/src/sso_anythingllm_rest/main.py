@@ -19,6 +19,7 @@ from sso_anythingllm_rest import __version__ as app_version
 # Import routers
 from sso_anythingllm_rest.endpoints import sso
 from sso_anythingllm_rest.setup_di import setup_di as setup_rest_di
+from sso_anythingllm_service.monitoring.anythingllm_api_health_monitor import AnythingLlmApiHealthMonitor
 from sso_anythingllm_service.setup_di import setup_di as setup_service_di
 
 
@@ -78,12 +79,14 @@ def create_app() -> FastAPI:
         },
     )
 
-    # We rely on dependency injection to inject the existing repository from context
-    # (second argument that is not passed to the HealthMonitor instance)
+    # App information
+    pyctuator.set_build_info(name=app_name, version=app_version)
+    # Database health-check provider
     pyctuator.register_health_provider(
         provider=DbHealthProvider(name="SSO AnythingLLM Database", engine=di["sync_engine"])
     )
-    pyctuator.set_build_info(name=app_name, version=app_version)
+    # AnythingLLM Rest API health check provider.
+    pyctuator.register_health_provider(provider=AnythingLlmApiHealthMonitor(name="AnythingLLM Rest API Availability"))
 
     return app
 
