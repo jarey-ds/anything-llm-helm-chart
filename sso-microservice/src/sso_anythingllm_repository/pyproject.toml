@@ -12,7 +12,8 @@ dependencies = [
     "aiosqlite==0.21.0",
     "psycopg[binary,pool]",
     "psycopg2-binary",
-    "kink",
+    "asyncpg==0.30.0",
+    "kink==0.8.1",
     "httpx==0.28.1",
     "pydantic",
 ]

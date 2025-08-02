@@ -6,8 +6,10 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from kink import di
 from loguru import logger
 from pyctuator.endpoints import Endpoints
+from pyctuator.health.db_health_provider import DbHealthProvider
 from pyctuator.pyctuator import Pyctuator
 
 from sso_anythingllm_facade.setup_di import setup_di as setup_facade_di
@@ -78,7 +80,9 @@ def create_app() -> FastAPI:
 
     # We rely on dependency injection to inject the existing repository from context
     # (second argument that is not passed to the HealthMonitor instance)
-    # pyctuator.register_health_provider(provider=di[AsyncHealthProvider])
+    pyctuator.register_health_provider(
+        provider=DbHealthProvider(name="SSO AnythingLLM Database", engine=di["sync_engine"])
+    )
     pyctuator.set_build_info(name=app_name, version=app_version)
 
     return app

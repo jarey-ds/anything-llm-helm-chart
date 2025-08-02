@@ -1,8 +1,8 @@
 ## Documentation
 
-- [REST API Documentation](src/artemis_model_catalogue_rest/docs/API_DOC.md): Overview and diagram of the REST API endpoints.
+- [REST API Documentation](src/sso_anythingll_rest/docs/API_DOC.md): Overview and diagram of the REST API endpoints.
 - [Application Architecture](docs/APP_ARCHITECTURE.md): Layered architecture and data flow of the application.
-- [Database ERD Documentation](src/artemis_model_catalogue_entity/docs/DATABASE_ERD.md): Database Entity-Relationship diagram based on declared entities.
+- [Database ERD Documentation](src/sso_anythingll_entity/docs/DATABASE_ERD.md): Database Entity-Relationship diagram based on declared entities.
 
 ## What is offered:
 

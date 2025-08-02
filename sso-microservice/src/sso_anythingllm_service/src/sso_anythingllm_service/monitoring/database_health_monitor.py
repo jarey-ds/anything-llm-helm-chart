@@ -8,7 +8,7 @@ from sso_anythingllm_repository.system_health_repository import SystemHealthRepo
 
 
 @inject
-class ArtemisModelCatalogueDatabaseHealthMonitor(HealthProvider):
+class SSOAnythingLLMDatabaseHealthMonitor(HealthProvider):
     db_health_repository: SystemHealthRepository
 
     def __init__(
