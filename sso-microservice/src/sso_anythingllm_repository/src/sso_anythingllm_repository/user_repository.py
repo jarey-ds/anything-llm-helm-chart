@@ -1,8 +1,6 @@
 import logging
 
 from kink import inject
-
-# from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from typing_extensions import override
