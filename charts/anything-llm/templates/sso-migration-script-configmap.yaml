@@ -1,0 +1,29 @@
+{{- if and .Values.sso.enabled .Values.postgresql.enabled .Values.sso.migrations.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "anything-llm.fullname" . }}-sso-migration-script
+  labels:
+    {{- include "anything-llm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sso-migrations
+data:
+  migration-script.sh: |
+    #!/bin/bash
+    set -e
+    
+    echo "Running Alembic migrations for SSO microservice..."
+    
+    # Wait for PostgreSQL to be ready
+    echo "Waiting for PostgreSQL to be ready..."
+    echo "Environment variables:"
+    echo "POSTGRES_HOST: $POSTGRES_HOST"
+    echo "POSTGRES_USER: $POSTGRES_USER"
+    echo "POSTGRES_DB: $POSTGRES_DB"
+    echo "POSTGRES_PASSWORD: [HIDDEN]"
+    
+    # Run Alembic migrations using uv
+    echo "Running Alembic migrations with uv..."
+    /app/.venv/bin/alembic upgrade head
+    
+    echo "Alembic migrations completed successfully!"
+{{- end }} 

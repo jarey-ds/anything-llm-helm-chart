@@ -236,6 +236,13 @@ sso:
       cpu: 250m
       memory: 256Mi
   
+  # -- Database migration configuration
+  migrations:
+    # -- Enable database migrations
+    enabled: true
+    # -- Migration strategy: "job" or "init-container"
+    strategy: "init-container"
+  
   # -- Node selector for SSO microservice
   # nodeSelector: {}
   

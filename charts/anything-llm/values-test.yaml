@@ -82,6 +82,11 @@ sso:
       cpu: 250m
       memory: 256Mi
 
+  # Database migration configuration
+  migrations:
+    enabled: true
+    strategy: "init-container"
+
   # Enable PostgreSQL deployment
 postgresql:
   enabled: true
@@ -91,6 +96,7 @@ postgresql:
     username: "sso_anythingllm"
     password: "sso-anythingllm123"
     database: "sso_anythingllm"
+    enablePostgresUser: true
   # PostgreSQL service configuration
   service:
     type: ClusterIP
@@ -101,9 +107,6 @@ postgresql:
       enabled: true
       size: 8Gi
       storageClass: ""
-
-
-
     # PostgreSQL resources
     resources:
       limits:
@@ -112,13 +115,13 @@ postgresql:
       requests:
         cpu: 250m
         memory: 256Mi
-    # PostgreSQL architecture
-    architecture: standalone
-    # PostgreSQL image configuration
-    image:
-      registry: docker.io
-      repository: bitnami/postgresql
-      tag: "16.2.0"
-    # PostgreSQL metrics
-    metrics:
-      enabled: false
+  # PostgreSQL architecture
+  architecture: standalone
+  # PostgreSQL image configuration
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: "16.2.0"
+  # PostgreSQL metrics
+  metrics:
+    enabled: false

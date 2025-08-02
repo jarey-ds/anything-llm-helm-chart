@@ -8,7 +8,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.7.15 /uv /usr/local/bin/uv
 WORKDIR /app
 
 # Copy dependency files
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock alembic.ini ./
 COPY src ./src
 
 # Install dependencies using uv workspace with mounted secrets
@@ -47,7 +47,7 @@ RUN useradd -m -u 1000 appuser
 
 # Copy application code
 COPY --chown=appuser:appuser src ./src
-COPY --chown=appuser:appuser pyproject.toml uv.lock ./
+COPY --chown=appuser:appuser pyproject.toml uv.lock alembic.ini ./
 
 # openshift compability
 RUN chown -R appuser:appuser ${APP_DIR} \

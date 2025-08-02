@@ -1,0 +1,41 @@
+{{- if and .Values.sso.enabled .Values.postgresql.enabled .Values.sso.migrations.enabled (eq .Values.sso.migrations.strategy "job") }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "anything-llm.fullname" . }}-sso-migrations
+  labels:
+    {{- include "anything-llm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sso-migrations
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+spec:
+  backoffLimit: 10
+  activeDeadlineSeconds: 300
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: sso-migrations
+          image: "{{ .Values.sso.image.repository }}:{{ .Values.sso.image.tag }}"
+          imagePullPolicy: {{ .Values.sso.image.pullPolicy }}
+          command:
+            - /bin/bash
+            - /tmp/migration-script.sh
+          volumeMounts:
+            - name: migration-script
+              mountPath: /tmp/migration-script.sh
+              subPath: migration-script.sh
+          envFrom:
+            - configMapRef:
+                name: {{ include "anything-llm.fullname" . }}-sso-config
+            - secretRef:
+                name: {{ include "anything-llm.fullname" . }}-sso-secret
+          resources:
+            {{- toYaml .Values.sso.resources | nindent 12 }}
+      volumes:
+        - name: migration-script
+          configMap:
+            name: {{ include "anything-llm.fullname" . }}-sso-migration-script
+{{- end }} 

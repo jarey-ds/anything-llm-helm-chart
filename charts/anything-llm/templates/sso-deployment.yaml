@@ -18,6 +18,30 @@ spec:
         {{- include "anything-llm.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: sso
     spec:
+      {{- if and .Values.sso.migrations.enabled (eq .Values.sso.migrations.strategy "init-container") .Values.postgresql.enabled }}
+      initContainers:
+        - name: sso-migrations
+          image: "{{ .Values.sso.image.repository }}:{{ .Values.sso.image.tag }}"
+          imagePullPolicy: {{ .Values.sso.image.pullPolicy }}
+          command:
+            - /bin/bash
+            - /tmp/migration-script.sh
+          volumeMounts:
+            - name: migration-script
+              mountPath: /tmp/migration-script.sh
+              subPath: migration-script.sh
+          envFrom:
+            - configMapRef:
+                name: {{ include "anything-llm.fullname" . }}-sso-config
+            - secretRef:
+                name: {{ include "anything-llm.fullname" . }}-sso-secret
+          resources:
+            {{- toYaml .Values.sso.resources | nindent 12 }}
+      volumes:
+        - name: migration-script
+          configMap:
+            name: {{ include "anything-llm.fullname" . }}-sso-migration-script
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}-sso
           image: "{{ .Values.sso.image.repository }}:{{ .Values.sso.image.tag }}"

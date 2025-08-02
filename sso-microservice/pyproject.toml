@@ -124,7 +124,7 @@ migrations-check = { help = "Check migrations for multiple heads", cmd = '''
   ''' }
 
 run-local = "docker compose up -d --wait postgres && alembic upgrade head && APP_PROFILE=LOCAL uvicorn sso_anythingllm_rest.main:app"
-
+run-migrations = "alembic upgrade head"
 # Database management
 db-start = "docker compose up -d postgres && sleep 5 && docker compose ps"
 db-stop = "docker compose stop postgres && echo 'Database stopped gracefully'"
