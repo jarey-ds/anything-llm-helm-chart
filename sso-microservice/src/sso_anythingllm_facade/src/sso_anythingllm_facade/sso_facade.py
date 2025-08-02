@@ -9,10 +9,18 @@ from sso_anythingllm_dto.config.keycloak import KeycloakTokenConfig
 from sso_anythingllm_dto.user import AnythingLLMUserDto
 from sso_anythingllm_dto_to_mapper.user_mapper import AnythingLLMUserDtoToMapper
 from sso_anythingllm_facade.interfaces import SSOFacadeInterface
+from sso_anythingllm_repository import ValidationError
 from sso_anythingllm_service.interfaces.api_key_service_interface import ApiKeyServiceInterface
 from sso_anythingllm_service.interfaces.auth_service_interface import AuthServiceInterface
 from sso_anythingllm_service.interfaces.sso_service_interface import SSOServiceInterface
 from sso_anythingllm_service.interfaces.user_service_interface import UserServiceInterface
+
+
+class NotAuthorizedException(Exception):
+    message: str | None
+
+    def __init__(self, message: str | None = None):
+        self.message = message
 
 
 @inject(alias=SSOFacadeInterface)
@@ -61,10 +69,17 @@ class SSOFacade(SSOFacadeInterface):
         incoming_user: AnythingLLMUserDto = AnythingLLMUserDtoToMapper(
             keycloak_config=di[KeycloakTokenConfig]
         ).from_target(target=user)
+
+        if not incoming_user.role:
+            raise NotAuthorizedException(message="User is not authorized to access the AnythingLLM platform.")
+
         # Check if user exist on local database
-        db_user: AnythingLLMUserDto = await self.user_service.get_user_by_keycloak_id(
-            keycloak_id=incoming_user.keycloak_id
-        )
+        db_user: AnythingLLMUserDto | None = None
+        try:
+            db_user = await self.user_service.get_user_by_keycloak_id(keycloak_id=incoming_user.keycloak_id)
+        except ValidationError:
+            pass
+
         if db_user is None:
             # Create the user in AnythingLLM's side, using the API Rest
             anything_llm_user_id: int = await self.user_service.create_user_in_anything_llm(
@@ -90,28 +105,6 @@ class SSOFacade(SSOFacadeInterface):
             raise ValueError(
                 "Business logic error, the user should always have an internal AnythingLLM identifier here."
             )
-        await self.sso_service.get_sso_url_for_user(
+        return await self.sso_service.get_sso_url_for_user(
             anything_llm_user_id=int(processed_user.internal_id), api_key=api_key.value
         )
-
-        return ""
-
-    # async def save_user_in_anythingllm_and_db(self, user: AnythingLLMUserDto) -> AnythingLLMUserDto:
-    #    """Stores the user first in the AnythingLLM Rest API. and then on local database"""
-    # user: AnythingLLMUserDto = self.user_service.save_in_anything_llm(user=user)
-    ## Save user in DB with the internal_id from AnythingLLM populated as a result of the Rest API call.
-    # user = await self.user_service.save(user=user)
-    # return user
-
-    # async def check_user_in_anythingllm_and_update_on_db(self, user: AnythingLLMUserDto) -> AnythingLLMUserDto:
-    # We update the user no matter what, to avoid getting the user,
-    # inspecting if roles are the same and if they missmatch
-    # performing another call to update the user on AnythingLLM; since no matter what the use-case is, we would need
-    # to perform at least 1 API call in this use-case, we minimise the number of calls
-    # to be only 1 instead of 2 in the worst case scenario.
-    # if user.internal_id is None:
-    #    raise ValueError("If the user exists in the database it should have an AnythingLLM internal ID.")
-
-    # user = await self.user_service.update(user=user)
-    # user = await self.user_service.update_user_in_anything_llm(user=user)
-    # return user

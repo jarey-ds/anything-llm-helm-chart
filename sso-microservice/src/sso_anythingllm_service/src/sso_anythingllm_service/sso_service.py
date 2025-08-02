@@ -19,5 +19,5 @@ class SSOService(SSOServiceInterface):
             base_url=self.anything_llm_config.url, verify_ssl=self.anything_llm_config.verify_ssl, api_key=api_key
         )
         repo: AnythingLLMRepositoryInterface = AnythingLLMRepository(config=config)
-        result = repo.issue_auth_token(user_id=anything_llm_user_id)
-        return str(result)
+        result = await repo.issue_auth_token(user_id=anything_llm_user_id)
+        return self.anything_llm_config.url + result["loginPath"]

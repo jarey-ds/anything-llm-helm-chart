@@ -3,8 +3,14 @@
 # Import service implementations
 from pathlib import Path
 
-# Import interfaces
-from sso_anythingllm_service.interfaces import SSOServiceInterface, UserServiceInterface
+from sso_anythingllm_service.api_key_service import ApiKeyService
+from sso_anythingllm_service.auth_service import AuthService
+from sso_anythingllm_service.interfaces import (
+    ApiKeyServiceInterface,
+    AuthServiceInterface,
+    SSOServiceInterface,
+    UserServiceInterface,
+)
 from sso_anythingllm_service.sso_service import SSOService
 from sso_anythingllm_service.user_service import UserService
 
@@ -19,7 +25,11 @@ __all__ = [
     # Service implementations
     "SSOService",
     "UserService",
+    "AuthService",
+    "ApiKeyService",
     # Service interfaces
     "UserServiceInterface",
     "SSOServiceInterface",
+    "ApiKeyServiceInterface",
+    "AuthServiceInterface",
 ]

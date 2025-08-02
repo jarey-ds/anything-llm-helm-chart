@@ -21,9 +21,14 @@ class AnythingLLMUserDtoToMapper:
 
     def from_target(self, target: dict) -> AnythingLLMUserDto:
         """Convert dict based key-values properties to AnythingLLMUserDto."""
+        role: str | None = None
+        for value in target[self.keycloak_config.group_claim]:
+            if value in self.keycloak_config.group_correlations.keys():
+                role = self.keycloak_config.group_correlations[value]
+
         user_dto: AnythingLLMUserDto = AnythingLLMUserDto(
             name=target[self.keycloak_config.username_claim],
             keycloak_id=target[self.keycloak_config.id_claim],
-            role=self.keycloak_config.group_correlations[target[self.keycloak_config.group_claim]],
+            role=role,
         )
         return user_dto

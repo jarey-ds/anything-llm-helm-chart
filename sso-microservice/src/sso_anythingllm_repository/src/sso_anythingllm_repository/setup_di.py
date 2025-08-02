@@ -2,7 +2,10 @@ import os
 
 from kink import di
 
+from sso_anythingllm_repository import ApiKeyRepositoryInterface, UserRepositoryInterface
+from sso_anythingllm_repository.api_key_repository import ApiKeyRepository
 from sso_anythingllm_repository.config import AsyncPostgresConf
+from sso_anythingllm_repository.user_repository import UserRepository
 
 
 def setup_di():
@@ -16,3 +19,5 @@ def setup_di():
     di[AsyncPostgresConf] = db_configuration
     di["async_engine"] = db_configuration.engine
     di["sync_engine"] = db_configuration.sync_engine
+    di[UserRepositoryInterface] = UserRepository(db_config=db_configuration)
+    di[ApiKeyRepositoryInterface] = ApiKeyRepository(db_config=db_configuration)

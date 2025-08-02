@@ -28,6 +28,14 @@ class UserService(UserServiceInterface):
         entity = await self.user_repository.get_by_anythingllm_id(anythingllm_id)
         return self.mapper.from_target(entity)
 
+    def _sanitise_anythingllm_username(self, username: str) -> str:
+        """Sanitises the username string to align with internal AnythingLLM's policies:
+        Username must only contain lowercase letters, periods, numbers, underscores, and hyphens with no spaces"}
+        """
+
+        result = username.replace(" ", "-").replace("@", "-").replace("#", "-").lower()
+        return result
+
     # ──────────────────────────── CREATE ────────────────────────────
     async def save(self, user: AnythingLLMUserDto) -> AnythingLLMUserDto:
         entity = await self.user_repository.save(self.mapper.to_target(user))
@@ -40,7 +48,11 @@ class UserService(UserServiceInterface):
         )
         repo: AnythingLLMRepositoryInterface = AnythingLLMRepository(config=config)
         result = await repo.create_user(
-            user_data={"username": user.keycloak_id, "role": user.role, "password": "default-user-password"}
+            user_data={
+                "username": self._sanitise_anythingllm_username(user.keycloak_id),
+                "role": user.role,
+                "password": "default-user-password",
+            }
         )
         return int(result["user"]["id"])
 
@@ -61,7 +73,7 @@ class UserService(UserServiceInterface):
             result = await repo.update_user(
                 user_id=user.internal_id,
                 user_data={
-                    "username": user.keycloak_id,
+                    "username": self._sanitise_anythingllm_username(user.keycloak_id),
                     "role": user.role,
                     "password": "default-user-password",
                     "suspended": 0,

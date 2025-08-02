@@ -6,13 +6,13 @@ import jwt
 
 # Source imports
 # ────────────────────────────────────────── imports ────────────────────────────────────────── #
-from fastapi import APIRouter, Depends, FastAPI
+from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from fastapi.security import OAuth2
 from pydantic import BaseModel
 from starlette.status import HTTP_200_OK
 
-from sso_anythingllm_dto.user import KeycloakUserDto
 from sso_anythingllm_facade.interfaces.sso_facade_interface import SSOFacadeInterface
+from sso_anythingllm_facade.sso_facade import NotAuthorizedException
 from sso_anythingllm_rest.dependencies import LazySingleton
 
 # ───────────────────────────────────────────────────────────────────────────────────────────── #
@@ -23,9 +23,6 @@ ROUTER_TAG = "SSO Integration"
 router = APIRouter()
 
 sso_facade = LazySingleton(SSOFacadeInterface)
-
-# Create mapper instances at module level for reuse
-# provider_instance_dto_to_to_mapper = ProviderInstanceDtoToProviderToMapper()
 
 
 oauth2_scheme = OAuth2()
@@ -79,9 +76,10 @@ async def get_sso_url(current_user: Annotated[Dict, Depends(get_current_user)]) 
     Gets the temporarily access URL to a given user on AnythingLLM.
     """
     # Map user's info form the token processed as a dict to a business logic model.
-    user_dto: KeycloakUserDto = KeycloakUserDto(id="aloha", name="Jose", groups=["admin"])
+    # user_dto: KeycloakUserDto = KeycloakUserDto(id="aloha", name="Jose", groups=["admin"])
     # Get the URL
-    url = await sso_facade.get_anything_llm_sso_url(user=user_dto)
-
-    # Provide the URL as a result
-    return url
+    try:
+        # Provide the URL as a result
+        return await sso_facade.get_anything_llm_sso_url(user=current_user)
+    except NotAuthorizedException as error:
+        raise HTTPException(status_code=403, detail=error.message)
