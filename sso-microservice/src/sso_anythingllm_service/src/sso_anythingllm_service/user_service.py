@@ -38,4 +38,4 @@ class UserService(UserServiceInterface):
 
     # ──────────────────────────── DELETE ────────────────────────────
     async def delete(self, user: AnythingLLMUserDto):
-        await self.user_repository.delete_by_keycloak_id(id=user.keycloak_id)
+        await self.user_repository.delete_by_keycloak_id(keycloak_id=user.keycloak_id)
