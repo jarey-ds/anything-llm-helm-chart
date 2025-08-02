@@ -37,6 +37,9 @@ class TestApiKeyRepository:
         mock_async_session.return_value.__aenter__.return_value = mock_session
         mock_async_session.return_value.__aexit__.return_value = None
 
+        # Mock session.add as a regular method (not async)
+        mock_session.add = MagicMock()
+
         # Mock that API key doesn't exist (for the existence check)
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = None
@@ -247,6 +250,9 @@ class TestApiKeyRepository:
         mock_session = AsyncMock()
         mock_async_session.return_value.__aenter__.return_value = mock_session
         mock_async_session.return_value.__aexit__.return_value = None
+
+        # Mock session.add as a regular method (not async)
+        mock_session.add = MagicMock()
 
         # Mock that API key doesn't exist
         mock_result = MagicMock()
