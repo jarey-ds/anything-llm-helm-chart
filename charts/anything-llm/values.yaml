@@ -212,10 +212,10 @@ sso:
   # -- Configuration for the SSO microservice
   config:
     # -- PostgreSQL configuration
-    POSTGRES_HOST: "{{ .Release.Name }}-postgresql"
-    POSTGRES_USER: "sso-anythingllm"
+    POSTGRES_HOST: "postgresql"
+    POSTGRES_USER: "postgres"
     POSTGRES_PASSWORD: "sso-anythingllm123"
-    POSTGRES_DB: "sso-anythingllm"
+    POSTGRES_DB: "sso_anythingllm"
     # -- Keycloak configuration
     KEYCLOAK_ANYTHING_LLM_ID_CLAIM: "preferred_username"
     KEYCLOAK_ANYTHING_LLM_USERNAME_CLAIM: "preferred_username"
@@ -252,8 +252,8 @@ sso:
     # -- PostgreSQL configuration
     auth:
       postgresPassword: "sso-anythingllm123"
-      database: "sso-anythingllm"
-      username: "sso-anythingllm"
+      database: "sso_anythingllm"
+      username: "postgres"
       password: "sso-anythingllm123"
     # -- PostgreSQL service configuration
     service:
@@ -265,6 +265,7 @@ sso:
         enabled: true
         size: 8Gi
         storageClass: ""
+
     # -- PostgreSQL resources
     resources:
       limits:

@@ -7,7 +7,7 @@ metadata:
     {{- include "anything-llm.labels" . | nindent 4 }}
     app.kubernetes.io/component: sso
 data:
-  POSTGRES_HOST: {{ .Values.sso.config.POSTGRES_HOST | quote }}
+  POSTGRES_HOST: {{ printf "%s-postgresql" .Release.Name | quote }}
   POSTGRES_USER: {{ .Values.sso.config.POSTGRES_USER | quote }}
   POSTGRES_DB: {{ .Values.sso.config.POSTGRES_DB | quote }}
   KEYCLOAK_ANYTHING_LLM_ID_CLAIM: {{ .Values.sso.config.KEYCLOAK_ANYTHING_LLM_ID_CLAIM | quote }}
