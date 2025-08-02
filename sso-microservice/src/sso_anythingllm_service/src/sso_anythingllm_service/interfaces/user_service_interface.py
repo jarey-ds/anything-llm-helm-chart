@@ -25,3 +25,11 @@ class UserServiceInterface(Protocol):
 
     # ──────────────────────────── DELETE ────────────────────────────
     async def delete(self, user: AnythingLLMUserDto): ...
+
+    async def create_user_in_anything_llm(self, user: AnythingLLMUserDto, api_key: str) -> int:
+        """Creates the user in AnythingLLM and returns the user ID."""
+        ...
+
+    async def update_user_in_anything_llm(self, user: AnythingLLMUserDto, api_key: str) -> int:
+        """Updates the user in AnythingLLM and returns the user ID."""
+        ...

@@ -52,3 +52,7 @@ class ApiKeyServiceInterface(Protocol):
     async def get_api_keys(self) -> list[ApiKeyDto]:
         """Legacy method: Get all API keys (alias for get_all_api_keys)"""
         ...
+
+    async def generate_new_api_key(self, auth_token: str) -> ApiKeyDto:
+        """Generates a new api key using the Rest API of Anything LLM."""
+        ...

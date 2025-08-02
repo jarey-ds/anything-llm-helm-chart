@@ -202,7 +202,7 @@ class AnythingLLMRepository:
         return await self.post("/api/v1/admin/users/new", json_data=user_data, auth_token=auth_token)
 
     async def update_user(
-        self, user_id: int, user_data: Dict[str, str], auth_token: Optional[str] = None
+        self, user_id: int, user_data: Dict[str, Any], auth_token: Optional[str] = None
     ) -> Dict[str, Any]:
         return await self.post(f"/api/v1/admin/users/{user_id}", json_data=user_data, auth_token=auth_token)
 
