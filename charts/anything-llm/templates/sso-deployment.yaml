@@ -10,13 +10,18 @@ spec:
   replicas: {{ .Values.sso.replicaCount }}
   selector:
     matchLabels:
-      {{- include "anything-llm.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: {{ include "anything-llm.name" . }}-sso
+      app.kubernetes.io/instance: {{ .Release.Name }}
       app.kubernetes.io/component: sso
   template:
     metadata:
       labels:
-        {{- include "anything-llm.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/name: {{ include "anything-llm.name" . }}-sso
+        app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: sso
+        app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ include "anything-llm.chart" . }}
     spec:
       {{- if and .Values.sso.migrations.enabled (eq .Values.sso.migrations.strategy "init-container") .Values.postgresql.enabled }}
       initContainers:

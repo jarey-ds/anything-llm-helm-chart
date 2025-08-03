@@ -18,6 +18,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "anything-llm.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ include "anything-llm.name" . }}-sso
+    app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: sso
 {{- end }} 

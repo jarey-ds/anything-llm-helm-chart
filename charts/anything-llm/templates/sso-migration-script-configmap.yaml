@@ -25,5 +25,5 @@ data:
     echo "Running Alembic migrations with uv..."
     /app/.venv/bin/alembic upgrade head
     
-    echo "Alembic migrations completed successfully!"
+    echo "Alembic migrations completed successfully.!"
 {{- end }} 
