@@ -1,0 +1,7 @@
+
+Table anythingllm_user {
+  keycloak_id varchar [pk, note: 'Unique identifier, e.g., "jose@dataspartan.com"']
+  internal_id int [note: 'User's AnythingLLM internal ID.']
+  name varchar [note: "User's name"]
+  role varchar [note: 'AnythingLLM user's application role (admin|manager|default)']
+}

@@ -1,0 +1,88 @@
+{{- if and .Values.extras .Values.extras.enableMultiUserMode }}
+{{- $fullName := include "anything-llm.fullname" . }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: anythingllm-multiuser-setup
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+spec:
+  backoffLimit: 10
+  activeDeadlineSeconds: 300
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: setup-client
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              echo "Automatización de la configuración via script para soporte multi-usuario en Anythingllm."
+
+              # Espera activa hasta que keycloak se encuentre disponible.
+              echo "Esperando a que AnythingLLM esté disponible..."
+              until curl -s -f "{{ $fullName }}:{{ .Values.service.port }}" > /dev/null; do
+                echo "Esperando a AnythinLLM..."
+                sleep 5
+              done
+              echo "AnythingLLM disponible."
+
+              # Access token para el administrador.
+              echo "Getting admin access token..."
+              TOKEN_RESPONSE=$(curl -s -X POST "{{ $fullName }}:{{ .Values.service.port }}/api/request-token" \
+                -H "Content-Type: application/json; charset=utf-8" \
+                -d '{"password":"{{ .Values.secret.data.AUTH_TOKEN }}"}')
+
+              ACCESS_TOKEN=$(echo $TOKEN_RESPONSE | grep -o '"token":"[^"]*' | cut -d'"' -f4)
+
+              if [ -z "$ACCESS_TOKEN" ]; then
+                echo "Error al obtener el access token"
+                echo "Response: $TOKEN_RESPONSE"
+                exit 1
+              fi
+              echo "Access token obtenido: $ACCESS_TOKEN"
+
+              echo "Token para el usuario administrador inicial obtenido correctamente."
+                
+              # Habilitación del modo multi-usuario:
+              MULTI_USER_RESPONSE=$(curl -s POST "{{ $fullName }}:{{ .Values.service.port }}/api/system/enable-multi-user" \
+                -H "Content-Type: application/json; charset=utf-8" \
+                -H "Authorization: Bearer $ACCESS_TOKEN" \
+                -d '{"username":"{{ .Values.extras.anythingllmMultiUserAdminUsername }}",
+                   "password":"{{ .Values.extras.anythingllmMultiUserAdminPassword }}"
+                   }')
+              echo "Valores de la payload: '{"username":"{{.Values.extras.anythingllmMultiUserAdminUsername}}", "password":"{{ .Values.extras.anythingllmMultiUserAdminPassword }}"}'"
+              echo "Multi user result: $MULTI_USER_RESPONSE"
+              MULTI_USER_RESULT=$(echo $MULTI_USER_RESPONSE | grep -o '"success":true')
+            
+              if [ -z "$MULTI_USER_RESULT" ]; then
+                echo "Error al habilitar el modo multi-usuario"
+                echo "Response: $MULTI_USER_RESPONSE"
+                exit 1
+              fi
+              echo "Multi user result: $MULTI_USER_RESULT"
+
+              # Obtención automática de los token de seguridad para el usuario creado.
+              echo "Getting admin access token..."
+              SECURITY_CODES=$(curl -s POST "{{ $fullName }}:{{ .Values.service.port }}/api/request-token" \
+                -H "Content-Type: application/json; charset=utf-8" \
+                -d '{"username":"{{ .Values.extras.anythingllmMultiUserAdminUsername }}",
+                   "password": "{{ .Values.extras.anythingllmMultiUserAdminPassword }}"
+                   }')
+              echo "Valores de la payload: '{"username":"{{.Values.extras.anythingllmMultiUserAdminUsername}}", "password":"{{ .Values.extras.anythingllmMultiUserAdminPassword }}"}'"
+              echo "Security codes obtained: $SECURITY_CODES"
+
+              echo ""
+              echo "🎉 Configuración del modo multi-usuario en AnythingLLM terminada."
+              echo "================================================"
+              echo ""
+
+              echo "Ejecución terminada correctamente.!"
+
+{{- end }}

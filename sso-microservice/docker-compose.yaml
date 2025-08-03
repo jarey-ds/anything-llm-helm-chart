@@ -1,0 +1,66 @@
+# Use postgres/example user/password credentials
+
+services:
+
+  postgres:
+    image: postgres:16
+    restart: always
+    # set shared memory limit when using docker compose
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: sso-anythingllm
+      POSTGRES_PASSWORD: sso-anythingllm123
+      POSTGRES_DB: sso_anythingllm
+    ports:
+      - 5432:5432
+    volumes:
+      - postgresql-data:/var/lib/postgresql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
+      interval: 3s
+      timeout: 60s
+      retries: 5
+      start_period: 5s
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  sso-anythingllm:
+    build:
+      dockerfile: ./deploy/Dockerfile
+      context: .
+      secrets:
+        - pip-netrc
+        - pip-config
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: sso-anythingllm
+      POSTGRES_PASSWORD: sso-anythingllm123
+      POSTGRES_DB: sso_anythingllm
+      # keycloak y anythingllm
+      KEYCLOAK_ANYTHING_LLM_ID_CLAIM: preferred_username
+      KEYCLOAK_ANYTHING_LLM_USERNAME_CLAIM: preferred_username
+      KEYCLOAK_ANYTHING_LLM_GROUP_CLAIM: groups
+      KEYCLOAK_ANYTHING_LLM_GROUP_CORRELATIONS: "anything_llm_manager;manager,anything_llm_default;default,anything_llm_admin;admin"
+      # AnythingLLM API config for consumer
+      ANYTHING_LLM_URL: https://llm.example.com
+      ANYTHING_LLM_ADMIN_USER: admin
+      ANYTHING_LLM_ADMIN_PASSWORD: administrador
+      ANYTHING_LLM_VERIFY_SSL: false
+      
+    ports:
+      - 8000:8000
+
+volumes:
+  postgresql-data:
+
+secrets:
+  pip-netrc:
+    name: pip-netrc
+    file: ~/.netrc
+  pip-config:
+    name: pip-config
+    file: ~/.config/pip/pip.conf

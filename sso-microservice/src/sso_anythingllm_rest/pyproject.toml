@@ -1,0 +1,35 @@
+[project]
+name = "sso_anythingllm_rest"
+description = "REST API Layer for SSO AnythingLLM integration"
+requires-python = ">=3.11,<3.12"
+dynamic = ["version"]
+dependencies = [
+    "sso_anythingllm_facade",
+    "sso_anythingllm_to",
+    "fastapi==0.115.13",
+    "pydantic==2.11.7",
+    "loguru==0.7.3",
+    "uvicorn==0.34.3",
+    "pyctuator==1.2.0",
+    "kink",
+    "pyjwt"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "VERSION"
+pattern = "(?P<version>[^']+)"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sso_anythingllm_rest"]
+include = ["VERSION"]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+sso_anythingllm_facade = { workspace = true }
+sso_anythingllm_to = { workspace = true }

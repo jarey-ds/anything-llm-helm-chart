@@ -1,0 +1,28 @@
+[project]
+name = "sso_anythingllm_dto_entity_mapper"
+description = "DTO to Entity Mappers for AnythingLLM SSO integration"
+requires-python = ">=3.11,<3.12"
+dynamic = ["version"]
+dependencies = [
+    "sso_anythingllm__dto",
+    "sso_anythingllm__entity",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "VERSION"
+pattern = "(?P<version>[^']+)"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sso_anythingllm_dto_entity_mapper"]
+include = ["VERSION"]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+sso_anythingllm__dto = { workspace = true }
+sso_anythingllm__entity = { workspace = true }

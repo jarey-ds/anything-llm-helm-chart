@@ -1,0 +1,33 @@
+from typing import List, Protocol
+
+from sso_anythingllm_entity.api_key import ApiKey
+
+
+class ApiKeyRepositoryInterface(Protocol):
+    """Interface for ApiKey repository operations."""
+
+    # ──────────────────────────── GET ────────────────────────────
+    async def get_by_value(self, value: str) -> ApiKey: ...
+
+    # ──────────────────────────── CREATE ────────────────────────────
+    async def save(self, api_key: ApiKey) -> ApiKey: ...
+
+    # ──────────────────────────── UPDATE ────────────────────────────
+    async def update(self, api_key: ApiKey) -> ApiKey: ...
+
+    # ──────────────────────────── DELETE ────────────────────────────
+    async def delete_by_value(self, value: str) -> None: ...
+
+    # ──────────────────────────── ADDITIONAL CRUD OPERATIONS ────────────────────────────
+    async def get_all_api_keys(self) -> list[ApiKey]: ...
+
+    async def api_key_exists(self, value: str) -> bool: ...
+
+    async def count_api_keys(self) -> int: ...
+
+    # ──────────────────────────── LEGACY METHODS ────────────────────────────
+    async def create(self, api_key: ApiKey) -> ApiKey: ...
+
+    async def delete(self, api_key: ApiKey) -> None: ...
+
+    async def get_api_keys(self) -> List[ApiKey]: ...
