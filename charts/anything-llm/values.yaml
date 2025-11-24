@@ -213,7 +213,6 @@ sso:
   config:
     # -- PostgreSQL configuration
     POSTGRES_HOST: "postgresql"
-    POSTGRES_PORT: "5432"
     POSTGRES_USER: "postgres"
     POSTGRES_PASSWORD: "sso-anythingllm123"
     POSTGRES_DB: "sso_anythingllm"
@@ -223,10 +222,7 @@ sso:
     KEYCLOAK_ANYTHING_LLM_GROUP_CLAIM: "groups"
     KEYCLOAK_ANYTHING_LLM_GROUP_CORRELATIONS: "anything_llm_manager;manager,anything_llm_default;default,anything_llm_admin;admin"
     # -- AnythingLLM API configuration
-    # If not set, will default to internal service URL: http://<service-name>:<service-port>
-    # For internal cluster communication, leave empty to use service name
-    # For external access via ingress, set to: "https://llm.example.com"
-    ANYTHING_LLM_URL: ""  # Empty = use internal service (http://anything-llm:3001)
+    ANYTHING_LLM_URL: "https://llm.example.com"
     ANYTHING_LLM_ADMIN_USER: "admin"
     ANYTHING_LLM_ADMIN_PASSWORD: "administrador"
     ANYTHING_LLM_VERIFY_SSL: "false"
@@ -275,14 +271,8 @@ sso:
         enabled: true
         size: 8Gi
         storageClass: ""
-      # -- Extra volumes for official PostgreSQL image compatibility
-      # Mount emptyDir for /var/run/postgresql to fix read-only filesystem issue
-      extraVolumes:
-        - name: postgresql-run
-          emptyDir: {}
-      extraVolumeMounts:
-        - name: postgresql-run
-          mountPath: /var/run/postgresql
+
+
 
     # -- PostgreSQL resources
     resources:
@@ -295,15 +285,10 @@ sso:
     # -- PostgreSQL architecture
     architecture: standalone
     # -- PostgreSQL image configuration
-    # Using official PostgreSQL image instead of Bitnami due to licensing changes
-    # The official PostgreSQL image (postgres:16) uses standard env vars:
-    # POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_USER
-    # Note: The Bitnami chart may need extraEnvVars to map auth values correctly
-    # If authentication fails, you may need to add extraEnvVars mapping
     image:
       registry: docker.io
-      repository: postgres
-      tag: "16"
+      repository: bitnamilegacy/postgresql
+      tag: "16.2.0"
     # -- PostgreSQL metrics
     metrics:
       enabled: false
